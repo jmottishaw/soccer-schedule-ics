@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest  # Use the latest Ubuntu environment
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3  # Updated to v3
+        uses: actions/checkout@v3  # Use the latest version
 
       - name: Set up Python
-        uses: actions/setup-python@v4  # Updated to v4
+        uses: actions/setup-python@v4  # Use the latest version
 
       - name: Install dependencies
         run: |
@@ -23,9 +23,8 @@ jobs:
       - name: Run script
         run: python main.py  # Run my Python script to generate the .ics file
 
-      - name: Upload ICS file to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4  # Updated to v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}  # Use GitHub token for authentication
-          publish_dir: ./  # Look in the current directory for the .ics file
-          publish_branch: gh-pages  # This is where I'm hosting my files
+      - name: Commit and push ICS file to main branch
+        run: |
+          git add soccer_schedule.ics  # Stage the .ics file for commit
+          git commit -m "Update soccer_schedule.ics" || echo "No changes to commit"  # Commit changes
+          git push origin main  # Push changes to the main branch
