@@ -3,25 +3,27 @@ name: Generate ICS
 on:
   schedule:
     - cron: '*/15 * * * *'  # Runs every 15 minutes
-  workflow_dispatch:  # Allows me to manually trigger this workflow whenever I want
+  workflow_dispatch:  # Allows manual triggering
 
 jobs:
   build:
     runs-on: ubuntu-latest  # Use the latest Ubuntu environment
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3  # Use the latest version
+        uses: actions/checkout@v4  # Use the latest version
 
       - name: Set up Python
-        uses: actions/setup-python@v4  # Use the latest version
+        uses: actions/setup-python@v5  # Use the latest version
+        with:
+          python-version: '3.12'  # Specify Python 3.12
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip  # Upgrade pip to the latest
-          pip install -r requirements.txt  # Install all the libraries I need
+          pip install -r requirements.txt  # Install required libraries
 
       - name: Run script
-        run: python main.py  # Run my Python script to generate the .ics file
+        run: python main.py  # Run the Python script to generate the .ics file
 
       - name: Commit and push ICS file to main branch
         run: |
