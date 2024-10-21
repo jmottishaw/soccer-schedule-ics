@@ -3,9 +3,7 @@ import json
 from bs4 import BeautifulSoup
 from ics import Calendar, Event
 from datetime import datetime
-
-# Define the Google Cloud Storage bucket name
-BUCKET_NAME = 'your-bucket-name'
+import subprocess
 
 def generate_ics():
     # Request the schedule data
@@ -73,7 +71,7 @@ def generate_ics():
         # Field, Home, Guest
         field = game.find("div", class_="Schedule_Field_Name").text.strip() if game.find("div", class_="Schedule_Field_Name") else "No Field Assigned"
         home_team = game.find("div", class_="Schedule_Home_Text").text.strip() if game.find("div", class_="Schedule_Home_Text") else "--"
-        guest_team = game.find("div", class_="Schedule_Away_Text").text.strip() if game.find("div", class_="Schedule_Away_Text") else "--"
+        guest_team = game.find("div", class_="Schedule_Away_Text").text.strip() if game.find("div", "Schedule_Away_Text") else "--"
         
         # Combine date and time into a datetime object
         event_date = datetime.strptime(f"{date} {time}", "%b %d - %A %I:%M %p")
@@ -91,6 +89,11 @@ def generate_ics():
     # Save the .ics file
     with open('soccer_schedule.ics', 'w') as ics_file:
         ics_file.write(str(calendar))
+
+    # Commit the new .ics file to the main branch
+    subprocess.run(["git", "add", "soccer_schedule.ics"])
+    subprocess.run(["git", "commit", "-m", "Update soccer_schedule.ics"])
+    subprocess.run(["git", "push", "origin", "main"])
 
 if __name__ == "__main__":
     generate_ics()
