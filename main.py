@@ -42,7 +42,7 @@ def generate_ics():
     }
 
     # Make the POST request
-    response = requests.post(url, headers=headers, data=json.dumps(payload))
+    response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=30)
     
     if response.status_code != 200:
         raise Exception(f"Failed to fetch data. Status code: {response.status_code}")
