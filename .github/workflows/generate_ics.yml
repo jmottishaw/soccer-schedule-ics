@@ -2,7 +2,7 @@ name: Generate ICS
 
 on:
   schedule:
-    - cron: '*/15 * * * *'  # Runs every 15 minutes
+    - cron: '*/20 * * * *'  # Runs every 20 minutes
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
@@ -15,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5  # Use the latest version
         with:
-          python-version: '3.13'  # Specify Python 3.12
+          python-version: '3.13'  # Specify Python 3.13
 
       - name: Install dependencies
         run: |
@@ -27,6 +27,8 @@ jobs:
 
       - name: Commit and push ICS file to main branch
         run: |
+          git config --global user.email "actions@github.com"  # Set a generic email for commits
+          git config --global user.name "GitHub Actions"  # Set a generic name for commits
           git add soccer_schedule.ics  # Stage the .ics file for commit
-          git commit -m "Update soccer_schedule.ics" || echo "No changes to commit"  # Commit changes
+          git commit -m "Update soccer_schedule.ics" || echo "No changes to commit"  # Avoid failure if no changes
           git push origin main  # Push changes to the main branch
