@@ -1,9 +1,9 @@
 import requests
 import json
 from bs4 import BeautifulSoup
-from ics import Calendar, Event, Timezone
+from ics import Calendar, Event
+from ics.timezone import VTimeZone
 from datetime import datetime, timedelta
-from dateutil.tz import gettz
 import subprocess
 
 def generate_ics():
@@ -65,10 +65,9 @@ def generate_ics():
     calendar.prodid = 'ics.py - http://git.io/lLljaA'
     calendar.x_wr_calname = 'LSA U14BT3 Hart Schedule'
     calendar.x_wr_caldesc = 'Event schedule for LSA U14BT3 Hart team'
-    calendar.x_wr_timezone = 'America/Los_Angeles'
-
+    
     # Define Timezone using python-ics
-    timezone = Timezone.from_tzid('America/Los_Angeles')
+    timezone = VTimeZone('America/Los_Angeles')
     
     # Month mapping for determining the year
     month_map = {m: i for i, m in enumerate(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], start=1)}
@@ -86,7 +85,8 @@ def generate_ics():
         event_year = 2024 if month >= 8 else 2025
         
         # Create a timezone-aware datetime object
-        event_date = timezone.localize(datetime(event_year, month, day, hour=int(time_str.split(':')[0]), minute=int(time_str.split(':')[1][:2])))
+        event_date = datetime(event_year, month, day, hour=int(time_str.split(':')[0]), minute=int(time_str.split(':')[1][:2]))
+        event_date = timezone.localize(event_date)  # Localizing the event date
         end_date = event_date + timedelta(hours=2)  # Assuming events last 2 hours
 
         # Home and Guest teams
@@ -109,12 +109,20 @@ def generate_ics():
     with open('soccer_schedule.ics', 'w') as ics_file:
         ics_file.write(calendar.serialize())  # Use serialize() method
 
-    # Commit and push the ICS file as previously described
+    # Commit and push the ICS file
     subprocess.run(["git", "config", "--global", "user.email", "actions@github.com"])
-    subprocess.run(["git", "--global", "user.name", "GitHub Actions"])
+    subprocess.run(["git", "config", "--global", "user.name", "GitHub Actions"])
     subprocess.run(["git", "add", "soccer_schedule.ics"])
-    subprocess.run(["git", "commit", "-m", "Update soccer_schedule.ics"])
-    subprocess.run(["git", "push", "origin", "gh-pages"])
+    commit_result = subprocess.run(["git", "commit", "-m", "Update soccer_schedule.ics"], capture_output=True, text=True)
+    
+    # Check for changes and handle no changes to commit
+    if commit_result.returncode != 0:
+        if "nothing to commit" in commit_result.stderr:
+            print("No changes to commit")
+        else:
+            raise Exception("Failed to commit changes: " + commit_result.stderr)
+
+    subprocess.run(["git", "push", "origin", "gh-pages"])  # Push to the gh-pages branch
 
 if __name__ == "__main__":
     generate_ics()
