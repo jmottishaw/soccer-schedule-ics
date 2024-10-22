@@ -59,11 +59,11 @@ def generate_ics():
     
     # Add calendar properties
     calendar.add('prodid', 'ics.py - http://git.io/lLljaA')
-    calendar.add('version', '2.0')
-    calendar.add('calscale', 'GREGORIAN')
-    calendar.add('x-wr-calname', 'LSA U14BT3 Hart Schedule')
-    calendar.add('x-wr-caldesc', 'Event schedule for LSA U14BT3 Hart team')
-    calendar.add('x-wr-timezone', 'America/Los_Angeles')
+    calendar.add('version', '2.0')  # Required by iCalendar spec
+    calendar.add('calscale', 'GREGORIAN')  # Ensures standard calendar format
+    calendar.add('x-wr-calname', 'LSA U14BT3 Hart Schedule')  # Calendar name
+    calendar.add('x-wr-caldesc', 'Event schedule for LSA U14BT3 Hart team')  # Calendar description
+    calendar.add('x-wr-timezone', 'America/Los_Angeles')  # Timezone declaration
 
     # Add Timezone information for America/Los_Angeles
     tz = Timezone()
@@ -74,7 +74,7 @@ def generate_ics():
     standard.add('dtstart', datetime(2024, 11, 3, 2, 0, 0))  # Daylight savings end date (2024)
     standard.add('tzoffsetfrom', timedelta(hours=-7))  # Offset during daylight savings (PDT)
     standard.add('tzoffsetto', timedelta(hours=-8))  # Offset during standard time (PST)
-    standard.add('tzname', 'PST')
+    standard.add('tzname', 'PST')  # Timezone name
     tz.add_component(standard)
 
     # Daylight savings time (PDT)
@@ -82,37 +82,31 @@ def generate_ics():
     daylight.add('dtstart', datetime(2024, 3, 10, 2, 0, 0))  # Daylight savings start date (2024)
     daylight.add('tzoffsetfrom', timedelta(hours=-8))  # Offset during standard time (PST)
     daylight.add('tzoffsetto', timedelta(hours=-7))  # Offset during daylight savings (PDT)
-    daylight.add('tzname', 'PDT')
+    daylight.add('tzname', 'PDT')  # Timezone name
     tz.add_component(daylight)
 
     calendar.add_component(tz)
 
-    # Mapping of month abbreviations to numbers
+    # Month mapping for determining the year
     month_map = {m: i for i, m in enumerate(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], start=1)}
 
     for game in games:
         # Extract date and time
-        date_text = game.find("div", class_="Schedule_Date").b.text.strip()
-        time_str = game.find("div", class_="Schedule_Date").find_next("div").text.strip()
+        date_text = game.find("div", class_="Schedule_Date").b.text.strip()  # Date
+        time_str = game.find("div", class_="Schedule_Date").find_next("div").text.strip()  # Time
         
         if not time_str or time_str == "TBD":
             continue  # Skip events without a defined time
         
-        month_str, day_str = date_text.split(' - ')[0].split(' ', 1)
-        day = int(day_str)
-        month = month_map.get(month_str, None)
-
-        if month is None:
-            print(f"Invalid month string: {month_str}")
-            continue
-
-        # Use 2024 as the base year, adjust year if necessary
-        event_year = 2024 if month >= 8 else 2025
+        month_str, day_str = date_text.split(' - ')[0].split(' ', 1)  # e.g., 'Sep 7'
+        day = int(day_str)  # Extract day as an integer
+        month = month_map[month_str]  # Map month abbreviation to a number
+        event_year = 2024 if month >= 8 else 2025  # Assume events after August are in the current year, others in the next
 
         try:
-            # Create timezone-aware datetime object in UTC-08:00
+            # Create timezone-aware datetime object using America/Los_Angeles timezone
             event_date = datetime(event_year, month, day, hour=int(time_str.split(':')[0]), minute=int(time_str.split(':')[1][:2]), tzinfo=timezone(timedelta(hours=-8)))
-            end_date = event_date + timedelta(hours=2)  # Assume 2-hour duration
+            end_date = event_date + timedelta(hours=2)  # Assume each event lasts 2 hours
         except Exception as e:
             print(f"Error parsing date: {e}")
             continue
@@ -124,11 +118,11 @@ def generate_ics():
         
         # Create the event
         event = Event()
-        event.add('summary', f"{home_team} vs {guest_team}")
-        event.add('dtstart', vDatetime(event_date))
-        event.add('dtend', vDatetime(end_date))
-        event.add('location', field)
-        event.add('description', f"Home: {home_team}, Guest: {guest_team}")
+        event.add('summary', f"{home_team} vs {guest_team}")  # Event title
+        event.add('dtstart', vDatetime(event_date))  # Event start time
+        event.add('dtend', vDatetime(end_date))  # Event end time
+        event.add('location', field)  # Event location
+        event.add('description', f"Home: {home_team}, Guest: {guest_team}")  # Description with teams
 
         # Add the event to the calendar
         calendar.add_component(event)
