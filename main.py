@@ -118,6 +118,10 @@ def generate_ics():
     with open('soccer_schedule.ics', 'w') as ics_file:
         ics_file.write(calendar.serialize())  # Use serialize() method
 
+    # Set Git user identity before committing
+    subprocess.run(["git", "config", "--global", "user.email", "actions@github.com"])  # Use a generic email for commits
+    subprocess.run(["git", "config", "--global", "user.name", "GitHub Actions"])  # Use a generic name for commits
+
     # Commit the new .ics file to the main branch
     subprocess.run(["git", "add", "soccer_schedule.ics"])
 
