@@ -20,6 +20,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip  # Upgrade pip to the latest
+          pip uninstall -y ics  # Clean up the old package if exists
           pip install -r requirements.txt  # Install required libraries
 
       - name: Run script
@@ -29,6 +30,7 @@ jobs:
         run: |
           git config --global user.email "actions@github.com"  # Set a generic email for commits
           git config --global user.name "GitHub Actions"  # Set a generic name for commits
+          git checkout gh-pages || git checkout -b gh-pages  # Switch to gh-pages branch (create it if it doesn't exist)
           git add soccer_schedule.ics  # Stage the .ics file for commit
           git commit -m "Update soccer_schedule.ics" || echo "No changes to commit"  # Avoid failure if no changes
           git push origin gh-pages  # Push changes to the gh-pages branch
