@@ -9,7 +9,7 @@ def generate_ics():
     url = "https://lisa.gameschedule.ca/GSServicePublic.asmx/LOAD_SchedulePublic"
     headers = {
         'Content-Type': 'application/json; charset=UTF-8',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0',
         'x-requested-with': 'XMLHttpRequest',
     }
     payload = {
@@ -42,13 +42,11 @@ def generate_ics():
 
     # Make the POST request
     response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=30)
-    
     if response.status_code != 200:
         raise Exception(f"Failed to fetch data. Status code: {response.status_code}")
     
     json_response = response.json()
     p_content = json_response.get('d', {}).get('p_Content', None)
-    
     if not p_content:
         raise Exception("No content found in response.")
     
@@ -58,8 +56,6 @@ def generate_ics():
     
     # Create a new calendar
     calendar = Calendar()
-
-    # Set Calendar properties
     calendar.add('prodid', 'ics.py - http://git.io/lLljaA')
     calendar.add('version', '2.0')
     calendar.add('calscale', 'GREGORIAN')
@@ -92,21 +88,19 @@ def generate_ics():
 
     for game in games:
         # Extract date and time
-        date_text = game.find("div", class_="Schedule_Date").b.text.strip()  # Date
-        time_str = game.find("div", class_="Schedule_Date").find_next("div").text.strip()  # Time
-        
+        date_text = game.find("div", class_="Schedule_Date").b.text.strip()
+        time_str = game.find("div", class_="Schedule_Date").find_next("div").text.strip()
         if not time_str or time_str == "TBD":
             continue
         
-        month_str, day_str = date_text.split(' - ')[0].split(' ', 1)  # e.g., 'Sep 7'
-        day = int(day_str)  # Get the day as an integer
+        month_str, day_str = date_text.split(' - ')[0].split(' ', 1)
+        day = int(day_str)
         month = month_map[month_str]
         event_year = 2024 if month >= 8 else 2025
-        
-        # Create a timezone-aware datetime object
+
         try:
             event_date = datetime(event_year, month, day, hour=int(time_str.split(':')[0]), minute=int(time_str.split(':')[1][:2]), tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=-8)))
-            end_date = event_date + timedelta(hours=2)  # Assuming events last 2 hours
+            end_date = event_date + timedelta(hours=2)
         except Exception as e:
             print(f"Error parsing date: {e}")
             continue
@@ -115,7 +109,7 @@ def generate_ics():
         field = game.find("div", class_="Schedule_Field_Name").text.strip() if game.find("div", class_="Schedule_Field_Name") else "No Field Assigned"
         home_team = game.find("div", class_="Schedule_Home_Text").text.strip() if game.find("div", class_="Schedule_Home_Text") else "--"
         guest_team = game.find("div", class_="Schedule_Away_Text").text.strip() if game.find("div", "Schedule_Away_Text") else "--"
-        
+
         # Create event
         event = Event()
         event.add('summary', f"{home_team} vs {guest_team}")
