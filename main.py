@@ -1,7 +1,7 @@
 import requests
 import json
 from bs4 import BeautifulSoup
-from ics import Calendar, Event
+from ics import Calendar, Event, VTimeZone
 from datetime import datetime, timedelta
 import subprocess
 
@@ -67,27 +67,16 @@ def generate_ics():
     calendar.x_wr_caldesc = 'Event schedule for LSA U14BT3 Hart team'
     calendar.x_wr_timezone = 'America/Los_Angeles'
 
-    # Timezone definition
-    timezone = """
-    BEGIN:VTIMEZONE
-    TZID:America/Los_Angeles
-    BEGIN:DAYLIGHT
-    DTSTART:20240310T030000
-    TZOFFSETFROM:-0800
-    TZOFFSETTO:-0700
-    RRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3
-    TZNAME:PDT
-    END:DAYLIGHT
-    BEGIN:STANDARD
-    DTSTART:20241103T010000
-    TZOFFSETFROM:-0700
-    TZOFFSETTO:-0800
-    RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11
-    TZNAME:PST
-    END:STANDARD
-    END:VTIMEZONE
-    """
-    calendar.add('VTIMEZONE', timezone)
+    # Define VTIMEZONE
+    timezone = VTimeZone()
+    timezone.tzid = 'America/Los_Angeles'
+    
+    # Add daylight saving time rules
+    timezone.add_daylight(start=datetime(2024, 3, 10, 3, 0), offset=-timedelta(hours=7), name='PDT')
+    timezone.add_standard(start=datetime(2024, 11, 3, 1, 0), offset=-timedelta(hours=8), name='PST')
+    
+    # Add the timezone to the calendar
+    calendar.events.add(timezone)
 
     # Month mapping for determining the year
     month_map = {
