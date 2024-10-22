@@ -86,9 +86,11 @@ def generate_ics():
             month = month_map[month_str]  # Map month abbreviation to a number
             event_year = 2024 if month >= 8 else 2025  # Assume events after August are in the current year, others in the next
 
-            # Parse time and create timezone-aware datetime object using pytz
-            hour, minute = map(int, time_str.split(':'))
-            event_date = tz.localize(datetime(event_year, month, day, hour, minute))
+            # Parse time using strptime to handle AM/PM
+            event_time = datetime.strptime(time_str, "%I:%M %p")
+            
+            # Create datetime object with proper year, month, and day (use hour/minute from parsed time)
+            event_date = tz.localize(datetime(event_year, month, day, event_time.hour, event_time.minute))
 
             # Event end time (assumed to be 2 hours later)
             end_date = event_date + timedelta(hours=2)
