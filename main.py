@@ -79,17 +79,17 @@ def generate_ics():
             home_team = game.find("div", class_="Schedule_Home_Text").text.strip() if game.find("div", class_="Schedule_Home_Text") else "--"
             guest_team = game.find("div", "Schedule_Away_Text").text.strip() if game.find("div", "Schedule_Away_Text") else "--"
 
+            # Skip BYES or games where no teams are listed
+            if home_team == "--" or guest_team == "--":
+                print(f"Skipping BYE or invalid game on {month_str} {day}, {event_year}")
+                continue  # Skip this iteration if it's a BYE
+
             # Debug: Print date and time info
             print(f"Processing game: {home_team} vs {guest_team} on {month_str} {day}, {event_year} at {time_str}")
 
             # Handle "TBD" or blank times
             if not time_str or time_str == "TBD":
                 event_date = tz.localize(datetime(event_year, month, day))
-
-                # Debug: Check if it's within the next 6 days
-                print(f"Event date: {event_date}")
-                print(f"Current date: {datetime.now(tz)}")
-                print(f"6 days later: {datetime.now(tz) + timedelta(days=6)}")
 
                 # Only add TBD event if it's within the next 6 days
                 if datetime.now(tz) <= event_date <= (datetime.now(tz) + timedelta(days=6)):
