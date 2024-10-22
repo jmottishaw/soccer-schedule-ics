@@ -64,30 +64,11 @@ def generate_ics():
     # Calendar properties
     calendar.add('prodid', 'ics.py - http://git.io/lLljaA')
     calendar.add('x-wr-calname', 'LSA U14BT3 Hart Schedule')
-    calendar.add('x-wr-caldesc', 'Game schedule for LSA U14BT3 Hart')
+    calendar.add('x-wr-caldesc', 'Event schedule for LSA U14BT3 Hart team')
     calendar.add('x-wr-timezone', 'America/Los_Angeles')
 
     # Timezone definition
-    timezone = """
-    BEGIN:VTIMEZONE
-    TZID:America/Los_Angeles
-    BEGIN:DAYLIGHT
-    DTSTART:20240310T030000
-    TZOFFSETFROM:-0800
-    TZOFFSETTO:-0700
-    RRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3
-    TZNAME:PDT
-    END:DAYLIGHT
-    BEGIN:STANDARD
-    DTSTART:20241103T010000
-    TZOFFSETFROM:-0700
-    TZOFFSETTO:-0800
-    RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11
-    TZNAME:PST
-    END:STANDARD
-    END:VTIMEZONE
-    """
-    calendar.add_component(timezone)
+    calendar.add('vtz', 'America/Los_Angeles')
 
     # Month mapping for determining the year
     month_map = {
@@ -152,7 +133,7 @@ def generate_ics():
     subprocess.run(["git", "config", "--global", "user.email", "actions@github.com"])  # Use a generic email for commits
     subprocess.run(["git", "config", "--global", "user.name", "GitHub Actions"])  # Use a generic name for commits
 
-    # Commit the new .ics file to the main branch
+    # Commit the new .ics file to the gh-pages branch
     subprocess.run(["git", "add", "soccer_schedule.ics"])
 
     # Check for changes and commit
@@ -168,8 +149,8 @@ def generate_ics():
         else:
             raise Exception("Failed to commit changes: " + commit_result.stderr)
 
-    # Push the changes
-    subprocess.run(["git", "push", "origin", "main"])
+    # Push the changes to the gh-pages branch
+    subprocess.run(["git", "push", "origin", "gh-pages"])
 
 if __name__ == "__main__":
     generate_ics()
