@@ -102,7 +102,7 @@ def generate_ics():
             
             # Create the event
             event = Event()
-            event.add('summary', f"{home_team} vs {guest_team}")  # Event title
+            event.add('summary', f"{home_team.replace('LSA U14BT3 Hart', 'Lakehil U14 Tier 3')} vs {guest_team.replace('LSA U14BT3 Hart', 'Lakehil U14 Tier 3')}")  # Event title
             event.add('dtstart', vDatetime(event_date))  # Event start time
             event.add('dtend', vDatetime(end_date))  # Event end time
             event.add('location', field)  # Event location
