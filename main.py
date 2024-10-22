@@ -1,12 +1,7 @@
-import requests
-import json
-from bs4 import BeautifulSoup
-from icalendar import Calendar, Event, vDatetime, Timezone, TimezoneStandard, TimezoneDaylight
-from datetime import datetime, timedelta
-import pytz
+from icalendar import vDate
 
 def generate_ics():
-    # Request the schedule data
+    # Request the schedule data (unchanged)
     url = "https://lisa.gameschedule.ca/GSServicePublic.asmx/LOAD_SchedulePublic"
     headers = {
         'Content-Type': 'application/json; charset=UTF-8',
@@ -41,7 +36,7 @@ def generate_ics():
         """
     }
 
-    # Make the POST request
+    # Fetch the data (unchanged)
     response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=30)
     if response.status_code != 200:
         raise Exception(f"Failed to fetch data. Status code: {response.status_code}")
@@ -51,71 +46,79 @@ def generate_ics():
     if not p_content:
         raise Exception("No content found in response.")
     
-    # Parse HTML content
+    # Parse HTML content (unchanged)
     soup = BeautifulSoup(p_content, 'html.parser')
     games = soup.find_all("div", class_="Schedule_Row")
     
-    # Create a new calendar
+    # Create the calendar (unchanged)
     calendar = Calendar()
-    
-    # Add calendar properties
     calendar.add('prodid', 'ics.py - http://git.io/lLljaA')
-    calendar.add('version', '2.0')  # Required by iCalendar spec
-    calendar.add('calscale', 'GREGORIAN')  # Ensures standard calendar format
-    calendar.add('x-wr-calname', 'LSA U14BT3 Hart Schedule')  # Calendar name
-    calendar.add('x-wr-caldesc', 'Event schedule for LSA U14BT3 Hart team')  # Calendar description
-    calendar.add('x-wr-timezone', 'America/Los_Angeles')  # Timezone declaration
+    calendar.add('version', '2.0')
+    calendar.add('calscale', 'GREGORIAN')
+    calendar.add('x-wr-calname', 'LSA U14BT3 Hart Schedule')
+    calendar.add('x-wr-caldesc', 'Event schedule for LSA U14BT3 Hart team')
+    calendar.add('x-wr-timezone', 'America/Los_Angeles')
 
-    # Timezone setup using pytz
     tz = pytz.timezone('America/Los_Angeles')
-
-    # Month mapping for determining the year
     month_map = {m: i for i, m in enumerate(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], start=1)}
+
+    # Track if a "TBD" game has been added
+    tbd_game_added = False
 
     for game in games:
         try:
-            # Extract date and time
-            date_text = game.find("div", class_="Schedule_Date").b.text.strip()  # Date
-            time_str = game.find("div", class_="Schedule_Date").find_next("div").text.strip()  # Time
-            
-            if not time_str or time_str == "TBD":
-                continue  # Skip events without a defined time
+            date_text = game.find("div", class_="Schedule_Date").b.text.strip()
+            time_str = game.find("div", class_="Schedule_Date").find_next("div").text.strip()
 
-            month_str, day_str = date_text.split(' - ')[0].split(' ', 1)  # e.g., 'Sep 7'
-            day = int(day_str)  # Extract day as an integer
-            month = month_map[month_str]  # Map month abbreviation to a number
-            event_year = 2024 if month >= 8 else 2025  # Assume events after August are in the current year, others in the next
+            month_str, day_str = date_text.split(' - ')[0].split(' ', 1)
+            day = int(day_str)
+            month = month_map[month_str]
+            event_year = 2024 if month >= 8 else 2025
 
-            # Parse time using strptime to handle AM/PM
+            if time_str == "TBD" and not tbd_game_added:
+                # Create a placeholder event for "TBD" games, if within 6 days
+                event_date = tz.localize(datetime(event_year, month, day))
+                if datetime.now(tz) <= event_date <= (datetime.now(tz) + timedelta(days=6)):
+                    home_team = game.find("div", class_="Schedule_Home_Text").text.strip() if game.find("div", class_="Schedule_Home_Text") else "--"
+                    guest_team = game.find("div", "Schedule_Away_Text").text.strip() if game.find("div", "Schedule_Away_Text") else "--"
+
+                    event = Event()
+                    event.add('summary', f"{home_team} vs {guest_team} (TBD)")
+                    event.add('dtstart', vDate(event_date.date()))  # All-day event
+                    event.add('location', home_team)  # Set home team as location if no field is provided
+                    event.add('description', f"Home: {home_team}, Guest: {guest_team}. Time and location TBD.")
+                    calendar.add_component(event)
+
+                    # Mark the "TBD" game as added
+                    tbd_game_added = True
+                continue
+
+            if time_str == "TBD":
+                continue  # Skip additional "TBD" games if already handled
+
+            # Proceed with regular event creation (unchanged for games with time)
             event_time = datetime.strptime(time_str, "%I:%M %p")
-            
-            # Create datetime object with proper year, month, and day (use hour/minute from parsed time)
             event_date = tz.localize(datetime(event_year, month, day, event_time.hour, event_time.minute))
-
-            # Event end time (assumed to be 2 hours later)
             end_date = event_date + timedelta(hours=2)
-            
-            # Extract team and field info
+
             field = game.find("div", class_="Schedule_Field_Name").text.strip() if game.find("div", class_="Schedule_Field_Name") else "No Field Assigned"
             home_team = game.find("div", class_="Schedule_Home_Text").text.strip() if game.find("div", class_="Schedule_Home_Text") else "--"
-            guest_team = game.find("div", class_="Schedule_Away_Text").text.strip() if game.find("div", "Schedule_Away_Text") else "--"
-            
-            # Create the event
-            event = Event()
-            event.add('summary', f"{home_team.replace('LSA U14BT3 Hart', 'Lakehill U14 Tier 3')} vs {guest_team.replace('LSA U14BT3 Hart', 'Lakehill U14 Tier 3')}")  # Event title
-            event.add('dtstart', vDatetime(event_date))  # Event start time
-            event.add('dtend', vDatetime(end_date))  # Event end time
-            event.add('location', field)  # Event location
-            event.add('description', f"Home: {home_team.replace('LSA U14BT3 Hart', 'Lakehill')}, Guest: {guest_team.replace('LSA U14BT3 Hart', 'Lakehill')}")  # Description with teams
+            guest_team = game.find("div", "Schedule_Away_Text").text.strip() if game.find("div", "Schedule_Away_Text") else "--"
 
-            # Add the event to the calendar
+            event = Event()
+            event.add('summary', f"{home_team.replace('LSA U14BT3 Hart', 'Lakehill U14 Tier 3')} vs {guest_team.replace('LSA U14BT3 Hart', 'Lakehill U14 Tier 3')}")
+            event.add('dtstart', vDatetime(event_date))
+            event.add('dtend', vDatetime(end_date))
+            event.add('location', field)
+            event.add('description', f"Home: {home_team.replace('LSA U14BT3 Hart', 'Lakehill')}, Guest: {guest_team.replace('LSA U14BT3 Hart', 'Lakehill')}")
+
             calendar.add_component(event)
 
         except Exception as e:
             print(f"Error processing game: {e}")
             continue
 
-    # Save the .ics file
+    # Save the .ics file (unchanged)
     with open('soccer_schedule.ics', 'wb') as ics_file:
         ics_file.write(calendar.to_ical())
 
