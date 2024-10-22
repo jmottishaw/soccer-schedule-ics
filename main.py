@@ -61,14 +61,33 @@ def generate_ics():
     # Create a new calendar
     calendar = Calendar()
 
-    # Calendar properties
-    calendar.add('prodid', 'ics.py - http://git.io/lLljaA')
-    calendar.add('x-wr-calname', 'LSA U14BT3 Hart Schedule')
-    calendar.add('x-wr-caldesc', 'Event schedule for LSA U14BT3 Hart team')
-    calendar.add('x-wr-timezone', 'America/Los_Angeles')
+    # Set Calendar properties
+    calendar.prodid = 'ics.py - http://git.io/lLljaA'
+    calendar.x_wr_calname = 'LSA U14BT3 Hart Schedule'
+    calendar.x_wr_caldesc = 'Event schedule for LSA U14BT3 Hart team'
+    calendar.x_wr_timezone = 'America/Los_Angeles'
 
     # Timezone definition
-    calendar.add('vtz', 'America/Los_Angeles')
+    timezone = """
+    BEGIN:VTIMEZONE
+    TZID:America/Los_Angeles
+    BEGIN:DAYLIGHT
+    DTSTART:20240310T030000
+    TZOFFSETFROM:-0800
+    TZOFFSETTO:-0700
+    RRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3
+    TZNAME:PDT
+    END:DAYLIGHT
+    BEGIN:STANDARD
+    DTSTART:20241103T010000
+    TZOFFSETFROM:-0700
+    TZOFFSETTO:-0800
+    RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11
+    TZNAME:PST
+    END:STANDARD
+    END:VTIMEZONE
+    """
+    calendar.add('VTIMEZONE', timezone)
 
     # Month mapping for determining the year
     month_map = {
