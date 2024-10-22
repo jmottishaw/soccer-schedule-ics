@@ -120,7 +120,21 @@ def generate_ics():
 
     # Commit the new .ics file to the main branch
     subprocess.run(["git", "add", "soccer_schedule.ics"])
-    subprocess.run(["git", "commit", "-m", "Update soccer_schedule.ics"] || echo "No changes to commit")
+
+    # Check for changes and commit
+    commit_result = subprocess.run(
+        ["git", "commit", "-m", "Update soccer_schedule.ics"],
+        capture_output=True, text=True
+    )
+
+    # If no changes to commit, handle it
+    if commit_result.returncode != 0:
+        if "nothing to commit" in commit_result.stderr:
+            print("No changes to commit")
+        else:
+            raise Exception("Failed to commit changes: " + commit_result.stderr)
+
+    # Push the changes
     subprocess.run(["git", "push", "origin", "main"])
 
 if __name__ == "__main__":
