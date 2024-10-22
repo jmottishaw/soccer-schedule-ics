@@ -41,7 +41,7 @@ def generate_ics():
         """
     }
 
-    # Make the POST request
+    # Make the POST request with a 30-second timeout
     response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=30)
     
     if response.status_code != 200:
@@ -61,20 +61,24 @@ def generate_ics():
     # Create a new calendar
     calendar = Calendar()
 
+    # Get the current year
+    current_year = datetime.now().year  # Get the current year
+
     # Process each game and add it to the calendar
     for game in games:
         date = game.find("div", class_="Schedule_Date").b.text.strip()  # Date
         time = game.find("div", class_="Schedule_Date").find_next("div").text.strip()  # Time
+        
         if not time or time == "TBD":
             continue
         
-        # Field, Home, Guest
+        # Create event date with the current year
+        event_date = datetime.strptime(f"{current_year} {date} {time}", "%Y %b %d - %A %I:%M %p")
+        
+        # Home and Guest teams
         field = game.find("div", class_="Schedule_Field_Name").text.strip() if game.find("div", class_="Schedule_Field_Name") else "No Field Assigned"
         home_team = game.find("div", class_="Schedule_Home_Text").text.strip() if game.find("div", class_="Schedule_Home_Text") else "--"
         guest_team = game.find("div", class_="Schedule_Away_Text").text.strip() if game.find("div", "Schedule_Away_Text") else "--"
-        
-        # Combine date and time into a datetime object
-        event_date = datetime.strptime(f"{date} {time}", "%b %d - %A %I:%M %p")
         
         # Create a new event for each game
         event = Event()
@@ -86,13 +90,13 @@ def generate_ics():
         # Add the event to the calendar
         calendar.events.add(event)
 
-    # Save the .ics file
+    # Save the .ics file using serialize()
     with open('soccer_schedule.ics', 'w') as ics_file:
-        ics_file.write(str(calendar))
+        ics_file.write(calendar.serialize())  # Use serialize() method
 
     # Commit the new .ics file to the main branch
     subprocess.run(["git", "add", "soccer_schedule.ics"])
-    subprocess.run(["git", "commit", "-m", "Update soccer_schedule.ics"])
+    subprocess.run(["git", "commit", "-m", "Update soccer_schedule.ics"] || echo "No changes to commit")
     subprocess.run(["git", "push", "origin", "main"])
 
 if __name__ == "__main__":
