@@ -1,7 +1,7 @@
 import requests
 import json
 from bs4 import BeautifulSoup
-from icalendar import Calendar, Event, vDatetime
+from icalendar import Calendar, Event, vDatetime, Timezone, TimezoneStandard, TimezoneDaylight
 from datetime import datetime, timedelta, timezone
 
 def generate_ics():
@@ -61,17 +61,37 @@ def generate_ics():
 
     # Set Calendar properties
     calendar.add('prodid', 'ics.py - http://git.io/lLljaA')
+    calendar.add('version', '2.0')
+    calendar.add('calscale', 'GREGORIAN')
     calendar.add('x-wr-calname', 'LSA U14BT3 Hart Schedule')
     calendar.add('x-wr-caldesc', 'Event schedule for LSA U14BT3 Hart team')
     calendar.add('x-wr-timezone', 'America/Los_Angeles')
 
-    # Define the timezone offset for America/Los_Angeles
-    tz_offset = timezone(timedelta(hours=-8))  # Standard time offset (PST)
+    # Add Timezone information for America/Los_Angeles
+    tz = Timezone()
+    tz.add('tzid', 'America/Los_Angeles')
+
+    standard = TimezoneStandard()
+    standard.add('dtstart', datetime(2024, 11, 3, 2, 0, 0))
+    standard.add('tzoffsetfrom', timedelta(hours=-7))
+    standard.add('tzoffsetto', timedelta(hours=-8))
+    standard.add('tzname', 'PST')
+    tz.add_component(standard)
+
+    daylight = TimezoneDaylight()
+    daylight.add('dtstart', datetime(2024, 3, 10, 2, 0, 0))
+    daylight.add('tzoffsetfrom', timedelta(hours=-8))
+    daylight.add('tzoffsetto', timedelta(hours=-7))
+    daylight.add('tzname', 'PDT')
+    tz.add_component(daylight)
+
+    calendar.add_component(tz)
 
     # Month mapping for determining the year
     month_map = {m: i for i, m in enumerate(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], start=1)}
 
     for game in games:
+        # Extract date and time
         date_text = game.find("div", class_="Schedule_Date").b.text.strip()  # Date
         time_str = game.find("div", class_="Schedule_Date").find_next("div").text.strip()  # Time
         
@@ -84,10 +104,14 @@ def generate_ics():
         event_year = 2024 if month >= 8 else 2025
         
         # Create a timezone-aware datetime object
-        event_date = datetime(event_year, month, day, hour=int(time_str.split(':')[0]), minute=int(time_str.split(':')[1][:2]), tzinfo=tz_offset)
-        end_date = event_date + timedelta(hours=2)  # Assuming events last 2 hours
+        try:
+            event_date = datetime(event_year, month, day, hour=int(time_str.split(':')[0]), minute=int(time_str.split(':')[1][:2]), tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=-8)))
+            end_date = event_date + timedelta(hours=2)  # Assuming events last 2 hours
+        except Exception as e:
+            print(f"Error parsing date: {e}")
+            continue
 
-        # Home and Guest teams
+        # Extract team and field info
         field = game.find("div", class_="Schedule_Field_Name").text.strip() if game.find("div", class_="Schedule_Field_Name") else "No Field Assigned"
         home_team = game.find("div", class_="Schedule_Home_Text").text.strip() if game.find("div", class_="Schedule_Home_Text") else "--"
         guest_team = game.find("div", class_="Schedule_Away_Text").text.strip() if game.find("div", "Schedule_Away_Text") else "--"
@@ -104,8 +128,8 @@ def generate_ics():
         calendar.add_component(event)
 
     # Save the .ics file
-    with open('soccer_schedule.ics', 'w') as ics_file:
-        ics_file.write(calendar.to_ical().decode('utf-8'))
+    with open('soccer_schedule.ics', 'wb') as ics_file:
+        ics_file.write(calendar.to_ical())
 
 if __name__ == "__main__":
     generate_ics()
