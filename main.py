@@ -1,4 +1,9 @@
-from icalendar import vDate
+import requests
+import json
+from bs4 import BeautifulSoup
+from icalendar import Calendar, Event, vDatetime, Timezone, TimezoneStandard, TimezoneDaylight
+from datetime import datetime, timedelta
+import pytz
 
 def generate_ics():
     # Request the schedule data (unchanged)
