@@ -1,8 +1,9 @@
 import requests
 import json
 from bs4 import BeautifulSoup
-from ics import Calendar, Event, VTimeZone
+from ics import Calendar, Event, Timezone
 from datetime import datetime, timedelta
+from dateutil.tz import gettz
 import subprocess
 
 def generate_ics():
@@ -41,20 +42,19 @@ def generate_ics():
         """
     }
 
-    # Make the POST request with a 30-second timeout
+    # Make the POST request
     response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=30)
     
     if response.status_code != 200:
         raise Exception(f"Failed to fetch data. Status code: {response.status_code}")
     
-    # Parse the response
     json_response = response.json()
     p_content = json_response.get('d', {}).get('p_Content', None)
     
     if not p_content:
         raise Exception("No content found in response.")
     
-    # Parse the HTML content using BeautifulSoup
+    # Parse HTML content
     soup = BeautifulSoup(p_content, 'html.parser')
     games = soup.find_all("div", class_="Schedule_Row")
     
@@ -67,54 +67,26 @@ def generate_ics():
     calendar.x_wr_caldesc = 'Event schedule for LSA U14BT3 Hart team'
     calendar.x_wr_timezone = 'America/Los_Angeles'
 
-    # Define VTIMEZONE
-    timezone = VTimeZone()
-    timezone.tzid = 'America/Los_Angeles'
+    # Define Timezone using python-ics
+    timezone = Timezone.from_tzid('America/Los_Angeles')
     
-    # Add daylight saving time rules
-    timezone.add_daylight(start=datetime(2024, 3, 10, 3, 0), offset=-timedelta(hours=7), name='PDT')
-    timezone.add_standard(start=datetime(2024, 11, 3, 1, 0), offset=-timedelta(hours=8), name='PST')
-    
-    # Add the timezone to the calendar
-    calendar.events.add(timezone)
-
     # Month mapping for determining the year
-    month_map = {
-        'Jan': 1,
-        'Feb': 2,
-        'Mar': 3,
-        'Apr': 4,
-        'May': 5,
-        'Jun': 6,
-        'Jul': 7,
-        'Aug': 8,
-        'Sep': 9,
-        'Oct': 10,
-        'Nov': 11,
-        'Dec': 12
-    }
+    month_map = {m: i for i, m in enumerate(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], start=1)}
 
-    # Process each game and add it to the calendar
     for game in games:
         date_text = game.find("div", class_="Schedule_Date").b.text.strip()  # Date
-        time = game.find("div", class_="Schedule_Date").find_next("div").text.strip()  # Time
+        time_str = game.find("div", class_="Schedule_Date").find_next("div").text.strip()  # Time
         
-        if not time or time == "TBD":
+        if not time_str or time_str == "TBD":
             continue
         
-        # Extract month and day from the date_text
         month_str, day_str = date_text.split(' - ')[0].split(' ', 1)  # e.g., 'Sep 7'
         day = int(day_str)  # Get the day as an integer
-        
-        # Determine the year based on the month
         month = month_map[month_str]
-        if month >= 8:  # August (8) to December (12)
-            event_year = 2024
-        else:  # January (1) to May (5)
-            event_year = 2025
+        event_year = 2024 if month >= 8 else 2025
         
-        # Create event date with the determined year
-        event_date = datetime(event_year, month, day, hour=int(time.split(':')[0]), minute=int(time.split(':')[1][:2]))  # Set time correctly
+        # Create a timezone-aware datetime object
+        event_date = timezone.localize(datetime(event_year, month, day, hour=int(time_str.split(':')[0]), minute=int(time_str.split(':')[1][:2])))
         end_date = event_date + timedelta(hours=2)  # Assuming events last 2 hours
 
         # Home and Guest teams
@@ -122,42 +94,26 @@ def generate_ics():
         home_team = game.find("div", class_="Schedule_Home_Text").text.strip() if game.find("div", class_="Schedule_Home_Text") else "--"
         guest_team = game.find("div", class_="Schedule_Away_Text").text.strip() if game.find("div", "Schedule_Away_Text") else "--"
         
-        # Create a new event for each game
+        # Create event
         event = Event()
         event.name = f"{home_team} vs {guest_team}"
         event.begin = event_date
-        event.end = end_date  # Set end time
+        event.end = end_date
         event.location = field
         event.description = f"Home: {home_team}, Guest: {guest_team}"
         
-        # Add the event to the calendar
+        # Add event to calendar
         calendar.events.add(event)
 
     # Save the .ics file using serialize()
     with open('soccer_schedule.ics', 'w') as ics_file:
         ics_file.write(calendar.serialize())  # Use serialize() method
 
-    # Set Git user identity before committing
-    subprocess.run(["git", "config", "--global", "user.email", "actions@github.com"])  # Use a generic email for commits
-    subprocess.run(["git", "config", "--global", "user.name", "GitHub Actions"])  # Use a generic name for commits
-
-    # Commit the new .ics file to the gh-pages branch
+    # Commit and push the ICS file as previously described
+    subprocess.run(["git", "config", "--global", "user.email", "actions@github.com"])
+    subprocess.run(["git", "--global", "user.name", "GitHub Actions"])
     subprocess.run(["git", "add", "soccer_schedule.ics"])
-
-    # Check for changes and commit
-    commit_result = subprocess.run(
-        ["git", "commit", "-m", "Update soccer_schedule.ics"],
-        capture_output=True, text=True
-    )
-
-    # If no changes to commit, handle it
-    if commit_result.returncode != 0:
-        if "nothing to commit" in commit_result.stderr:
-            print("No changes to commit")
-        else:
-            raise Exception("Failed to commit changes: " + commit_result.stderr)
-
-    # Push the changes to the gh-pages branch
+    subprocess.run(["git", "commit", "-m", "Update soccer_schedule.ics"])
     subprocess.run(["git", "push", "origin", "gh-pages"])
 
 if __name__ == "__main__":
