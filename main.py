@@ -1,12 +1,12 @@
 import requests
 import json
 from bs4 import BeautifulSoup
-from icalendar import Calendar, Event, vDatetime, Timezone, TimezoneStandard, TimezoneDaylight
+from icalendar import Calendar, Event, vDatetime, vDate
 from datetime import datetime, timedelta
 import pytz
 
 def generate_ics():
-    # Request the schedule data (unchanged)
+    # Fetch the data
     url = "https://lisa.gameschedule.ca/GSServicePublic.asmx/LOAD_SchedulePublic"
     headers = {
         'Content-Type': 'application/json; charset=UTF-8',
@@ -41,7 +41,6 @@ def generate_ics():
         """
     }
 
-    # Fetch the data (unchanged)
     response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=30)
     if response.status_code != 200:
         raise Exception(f"Failed to fetch data. Status code: {response.status_code}")
@@ -51,11 +50,11 @@ def generate_ics():
     if not p_content:
         raise Exception("No content found in response.")
     
-    # Parse HTML content (unchanged)
+    # Parse HTML content
     soup = BeautifulSoup(p_content, 'html.parser')
     games = soup.find_all("div", class_="Schedule_Row")
     
-    # Create the calendar (unchanged)
+    # Create the calendar
     calendar = Calendar()
     calendar.add('prodid', 'ics.py - http://git.io/lLljaA')
     calendar.add('version', '2.0')
@@ -67,9 +66,6 @@ def generate_ics():
     tz = pytz.timezone('America/Los_Angeles')
     month_map = {m: i for i, m in enumerate(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], start=1)}
 
-    # Track if a "TBD" game has been added
-    tbd_game_added = False
-
     for game in games:
         try:
             date_text = game.find("div", class_="Schedule_Date").b.text.strip()
@@ -80,35 +76,37 @@ def generate_ics():
             month = month_map[month_str]
             event_year = 2024 if month >= 8 else 2025
 
-            if time_str == "TBD" and not tbd_game_added:
-                # Create a placeholder event for "TBD" games, if within 6 days
-                event_date = tz.localize(datetime(event_year, month, day))
-                if datetime.now(tz) <= event_date <= (datetime.now(tz) + timedelta(days=6)):
-                    home_team = game.find("div", class_="Schedule_Home_Text").text.strip() if game.find("div", class_="Schedule_Home_Text") else "--"
-                    guest_team = game.find("div", "Schedule_Away_Text").text.strip() if game.find("div", "Schedule_Away_Text") else "--"
+            home_team = game.find("div", class_="Schedule_Home_Text").text.strip() if game.find("div", class_="Schedule_Home_Text") else "--"
+            guest_team = game.find("div", "Schedule_Away_Text").text.strip() if game.find("div", "Schedule_Away_Text") else "--"
 
+            # Debug: Print date and time info
+            print(f"Processing game: {home_team} vs {guest_team} on {month_str} {day}, {event_year} at {time_str}")
+
+            # Handle "TBD" or blank times
+            if not time_str or time_str == "TBD":
+                event_date = tz.localize(datetime(event_year, month, day))
+
+                # Debug: Check if it's within the next 6 days
+                print(f"Event date: {event_date}")
+                print(f"Current date: {datetime.now(tz)}")
+                print(f"6 days later: {datetime.now(tz) + timedelta(days=6)}")
+
+                # Only add TBD event if it's within the next 6 days
+                if datetime.now(tz) <= event_date <= (datetime.now(tz) + timedelta(days=6)):
                     event = Event()
                     event.add('summary', f"{home_team} vs {guest_team} (TBD)")
                     event.add('dtstart', vDate(event_date.date()))  # All-day event
                     event.add('location', home_team)  # Set home team as location if no field is provided
                     event.add('description', f"Home: {home_team}, Guest: {guest_team}. Time and location TBD.")
                     calendar.add_component(event)
-
-                    # Mark the "TBD" game as added
-                    tbd_game_added = True
                 continue
 
-            if time_str == "TBD":
-                continue  # Skip additional "TBD" games if already handled
-
-            # Proceed with regular event creation (unchanged for games with time)
+            # Process games with specific times
             event_time = datetime.strptime(time_str, "%I:%M %p")
             event_date = tz.localize(datetime(event_year, month, day, event_time.hour, event_time.minute))
             end_date = event_date + timedelta(hours=2)
 
             field = game.find("div", class_="Schedule_Field_Name").text.strip() if game.find("div", class_="Schedule_Field_Name") else "No Field Assigned"
-            home_team = game.find("div", class_="Schedule_Home_Text").text.strip() if game.find("div", class_="Schedule_Home_Text") else "--"
-            guest_team = game.find("div", "Schedule_Away_Text").text.strip() if game.find("div", "Schedule_Away_Text") else "--"
 
             event = Event()
             event.add('summary', f"{home_team.replace('LSA U14BT3 Hart', 'Lakehill U14 Tier 3')} vs {guest_team.replace('LSA U14BT3 Hart', 'Lakehill U14 Tier 3')}")
@@ -123,7 +121,7 @@ def generate_ics():
             print(f"Error processing game: {e}")
             continue
 
-    # Save the .ics file (unchanged)
+    # Save the .ics file
     with open('soccer_schedule.ics', 'wb') as ics_file:
         ics_file.write(calendar.to_ical())
 
