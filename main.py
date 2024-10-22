@@ -99,8 +99,8 @@ def generate_ics():
         event_year = 2024 if month >= 8 else 2025
 
         try:
-            event_date = datetime(event_year, month, day, hour=int(time_str.split(':')[0]), minute=int(time_str.split(':')[1][:2]), tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=-8)))
-            end_date = event_date + timedelta(hours=2)
+            event_date = datetime(event_year, month, day, hour=int(time_str.split(':')[0]), minute=int(time_str.split(':')[1][:2]), tzinfo=timezone(timedelta(hours=-8)))  # Correct TZ
+            end_date = event_date + timedelta(hours=2)  # Assuming events last 2 hours
         except Exception as e:
             print(f"Error parsing date: {e}")
             continue
@@ -113,8 +113,8 @@ def generate_ics():
         # Create event
         event = Event()
         event.add('summary', f"{home_team} vs {guest_team}")
-        event.add('dtstart', vDatetime(event_date))
-        event.add('dtend', vDatetime(end_date))
+        event.add('dtstart', vDatetime(event_date).to_ical())
+        event.add('dtend', vDatetime(end_date).to_ical())
         event.add('location', field)
         event.add('description', f"Home: {home_team}, Guest: {guest_team}")
         
