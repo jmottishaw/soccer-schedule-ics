@@ -10,7 +10,7 @@ def generate_ics():
     url = "https://lisa.gameschedule.ca/GSServicePublic.asmx/LOAD_SchedulePublic"
     headers = {
         'Content-Type': 'application/json; charset=UTF-8',
-        'User-Agent': 'Mozilla/5.0',
+        'User-Agent': 'Mozilla/5.0 (ICS Hunter/1.0) SeriouslyNoICS/1.0 (LookingForCalendarExport)',
         'x-requested-with': 'XMLHttpRequest',
     }
     payload = {
@@ -41,7 +41,7 @@ def generate_ics():
         """
     }
 
-    response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=30)
+    response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=60)
     if response.status_code != 200:
         raise Exception(f"Failed to fetch data. Status code: {response.status_code}")
     
