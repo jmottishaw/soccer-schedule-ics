@@ -146,7 +146,10 @@ def generate_ics():
             date_obj = datetime.strptime(date_str, "%Y-%m-%d")
             month, day, event_year = date_obj.month, date_obj.day, date_obj.year
             tz = pytz.timezone('America/Los_Angeles')
-
+    
+            # Now print details of the exhibition game being processed
+            print(f"Processing exhibition game: {home_team} vs {guest_team} on {date_obj.strftime('%b %d, %Y')} at {time_str}")
+            
             # Handle "TBD" or blank times
             if not time_str or time_str == "TBD":
                 event_date = tz.localize(datetime(event_year, month, day))
