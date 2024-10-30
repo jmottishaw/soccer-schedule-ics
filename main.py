@@ -6,6 +6,17 @@ from datetime import datetime, timedelta
 import pytz
 
 def generate_ics():
+
+    # Load exhibition games
+    exhibition_games = []
+    try:
+        with open('exhibition.csv', mode='r') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                exhibition_games.append(row)
+    except FileNotFoundError:
+        print("No exhibition games found. Skipping.")
+        
     # Fetch the data
     url = "https://lisa.gameschedule.ca/GSServicePublic.asmx/LOAD_SchedulePublic"
     headers = {
@@ -119,6 +130,49 @@ def generate_ics():
 
         except Exception as e:
             print(f"Error processing game: {e}")
+            continue
+    # Process exhibition games
+    for game in exhibition_games:
+        try:
+            # Extract details from CSV row
+            date_str = game['Date']
+            time_str = game['Time']
+            home_team = game['Home Team']
+            guest_team = game['Guest Team']
+            field = game['Field'] if game['Field'] else "No Field Assigned"
+
+            # Parse date and time
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+            month, day, event_year = date_obj.month, date_obj.day, date_obj.year
+            tz = pytz.timezone('America/Los_Angeles')
+
+            # Handle "TBD" or blank times
+            if not time_str or time_str == "TBD":
+                event_date = tz.localize(datetime(event_year, month, day))
+                event = Event()
+                event.add('summary', f"{home_team} vs {guest_team} (Exhibition - TBD)")
+                event.add('dtstart', vDate(event_date.date()))  # All-day event
+                event.add('location', field)
+                event.add('description', f"Exhibition game - Home: {home_team}, Guest: {guest_team}. Time TBD.")
+                calendar.add_component(event)
+                continue
+
+            # Process games with specific times
+            event_time = datetime.strptime(time_str, "%I:%M %p")
+            event_date = tz.localize(datetime(event_year, month, day, event_time.hour, event_time.minute))
+            end_date = event_date + timedelta(hours=2)
+
+            event = Event()
+            event.add('summary', f"{home_team} vs {guest_team} (Exhibition)")
+            event.add('dtstart', vDatetime(event_date))
+            event.add('dtend', vDatetime(end_date))
+            event.add('location', field)
+            event.add('description', f"Exhibition game - Home: {home_team}, Guest: {guest_team}")
+
+            calendar.add_component(event)
+
+        except Exception as e:
+            print(f"Error processing exhibition game: {e}")
             continue
 
     # Save the .ics file
