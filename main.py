@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 import pytz
 
 def generate_ics():
-
     # Load exhibition games
     exhibition_games = []
     try:
@@ -17,16 +16,20 @@ def generate_ics():
                 exhibition_games.append(row)
     except FileNotFoundError:
         print("No exhibition games found. Skipping.")
-        
-    # Fetch the data
+
+    # API Endpoint
     url = "https://lisa.gameschedule.ca/GSServicePublic.asmx/LOAD_SchedulePublic"
+
+    # Headers (Ensure they match what Chrome sent)
     headers = {
-        'Content-Type': 'application/json; charset=UTF-8',
-        'User-Agent': 'Mozilla/5.0 (ICS Hunter/1.0) SeriouslyNoICS/1.0 (LookingForCalendarExport)',
-        'x-requested-with': 'XMLHttpRequest',
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "x-requested-with": "XMLHttpRequest",
     }
+
+    # 🔹 Updated Payload (Formatted for Readability)
     payload = {
-        "ixCompetition": "6",
+        "strCompetition": "6|7|10|9",  # Multiple competitions
         "strFiltersXML": """
             <FILTERS>
                 <DATERANGE>
@@ -49,23 +52,32 @@ def generate_ics():
                     <NAME>FIELD</NAME>
                     <VALUE>-1</VALUE>
                 </FIELD>
+                <GAMES>
+                    <NAME>GAMES</NAME>
+                    <VALUE>UNPLAYED</VALUE>
+                </GAMES>
             </FILTERS>
-        """
+        """,
+        "strWeekMax": "2025|6|30:2025|7|6",
+        "strWeekMin": "2024|7|29:2024|8|4"
     }
 
-    response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=60)
+    # Send request to API
+    response = requests.post(url, headers=headers, json=payload, timeout=60)
+
+    # Check API response
     if response.status_code != 200:
-        raise Exception(f"Failed to fetch data. Status code: {response.status_code}")
-    
+        raise Exception(f"❌ Failed to fetch data. Status code: {response.status_code}\nResponse: {response.text}")
+
     json_response = response.json()
     p_content = json_response.get('d', {}).get('p_Content', None)
     if not p_content:
-        raise Exception("No content found in response.")
-    
+        raise Exception("❌ No content found in API response.")
+
     # Parse HTML content
     soup = BeautifulSoup(p_content, 'html.parser')
     games = soup.find_all("div", class_="Schedule_Row")
-    
+
     # Create the calendar
     calendar = Calendar()
     calendar.add('prodid', 'ics.py - http://git.io/lLljaA')
@@ -91,29 +103,24 @@ def generate_ics():
             home_team = game.find("div", class_="Schedule_Home_Text").text.strip() if game.find("div", class_="Schedule_Home_Text") else "--"
             guest_team = game.find("div", "Schedule_Away_Text").text.strip() if game.find("div", "Schedule_Away_Text") else "--"
 
-            # Skip BYES or games where no teams are listed
+            # Skip BYE games
             if home_team == "--" or guest_team == "--":
-                print(f"Skipping BYE or invalid game on {month_str} {day}, {event_year}")
-                continue  # Skip this iteration if it's a BYE
+                print(f"Skipping BYE game on {month_str} {day}, {event_year}")
+                continue
 
-            # Debug: Print date and time info
-            print(f"Processing game: {home_team} vs {guest_team} on {month_str} {day}, {event_year} at {time_str}")
+            print(f"Processing: {home_team} vs {guest_team} on {month_str} {day}, {event_year} at {time_str}")
 
-            # Handle "TBD" or blank times
             if not time_str or time_str == "TBD":
                 event_date = tz.localize(datetime(event_year, month, day))
-
-                # Only add TBD event if it's within the next 6 days
                 if datetime.now(tz) <= event_date <= (datetime.now(tz) + timedelta(days=6)):
                     event = Event()
                     event.add('summary', f"{home_team} vs {guest_team} (TBD)")
-                    event.add('dtstart', vDate(event_date.date()))  # All-day event
-                    event.add('location', home_team)  # Set home team as location if no field is provided
-                    event.add('description', f"Home: {home_team}, Guest: {guest_team}. Time and location TBD.")
+                    event.add('dtstart', vDate(event_date.date()))
+                    event.add('location', home_team)
+                    event.add('description', f"Home: {home_team}, Guest: {guest_team}. Time TBD.")
                     calendar.add_component(event)
                 continue
 
-            # Process games with specific times
             event_time = datetime.strptime(time_str, "%I:%M %p")
             event_date = tz.localize(datetime(event_year, month, day, event_time.hour, event_time.minute))
             end_date = event_date + timedelta(hours=2)
@@ -121,67 +128,23 @@ def generate_ics():
             field = game.find("div", class_="Schedule_Field_Name").text.strip() if game.find("div", class_="Schedule_Field_Name") else "No Field Assigned"
 
             event = Event()
-            event.add('summary', f"{home_team.replace('LSA U14BT3 Hart', 'Lakehill U14 Tier 3')} vs {guest_team.replace('LSA U14BT3 Hart', 'Lakehill U14 Tier 3')}")
+            event.add('summary', f"{home_team} vs {guest_team}")
             event.add('dtstart', vDatetime(event_date))
             event.add('dtend', vDatetime(end_date))
             event.add('location', field)
-            event.add('description', f"Home: {home_team.replace('LSA U14BT3 Hart', 'Lakehill')}, Guest: {guest_team.replace('LSA U14BT3 Hart', 'Lakehill')}")
+            event.add('description', f"Home: {home_team}, Guest: {guest_team}")
 
             calendar.add_component(event)
 
         except Exception as e:
-            print(f"Error processing game: {e}")
-            continue
-    # Process exhibition games
-    for game in exhibition_games:
-        try:
-            # Extract details from CSV row
-            date_str = game['Date']
-            time_str = game['Time']
-            home_team = game['Home Team']
-            guest_team = game['Guest Team']
-            field = game['Field'] if game['Field'] else "No Field Assigned"
-
-            # Parse date and time
-            date_obj = datetime.strptime(date_str, "%Y-%m-%d")
-            month, day, event_year = date_obj.month, date_obj.day, date_obj.year
-            tz = pytz.timezone('America/Los_Angeles')
-    
-            # Now print details of the exhibition game being processed
-            print(f"Processing exhibition game: {home_team} vs {guest_team} on {date_obj.strftime('%b %d, %Y')} at {time_str}")
-            
-            # Handle "TBD" or blank times
-            if not time_str or time_str == "TBD":
-                event_date = tz.localize(datetime(event_year, month, day))
-                event = Event()
-                event.add('summary', f"{home_team} vs {guest_team} (Exhibition - TBD)")
-                event.add('dtstart', vDate(event_date.date()))  # All-day event
-                event.add('location', field)
-                event.add('description', f"Exhibition game - Home: {home_team}, Guest: {guest_team}. Time TBD.")
-                calendar.add_component(event)
-                continue
-
-            # Process games with specific times
-            event_time = datetime.strptime(time_str, "%I:%M %p")
-            event_date = tz.localize(datetime(event_year, month, day, event_time.hour, event_time.minute))
-            end_date = event_date + timedelta(hours=2)
-
-            event = Event()
-            event.add('summary', f"{home_team} vs {guest_team} (Exhibition)")
-            event.add('dtstart', vDatetime(event_date))
-            event.add('dtend', vDatetime(end_date))
-            event.add('location', field)
-            event.add('description', f"Exhibition game - Home: {home_team}, Guest: {guest_team}")
-
-            calendar.add_component(event)
-
-        except Exception as e:
-            print(f"Error processing exhibition game: {e}")
+            print(f"❌ Error processing game: {e}")
             continue
 
     # Save the .ics file
     with open('soccer_schedule.ics', 'wb') as ics_file:
         ics_file.write(calendar.to_ical())
+
+    print("✅ Calendar successfully generated: soccer_schedule.ics")
 
 if __name__ == "__main__":
     generate_ics()
