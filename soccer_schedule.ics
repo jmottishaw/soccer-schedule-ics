@@ -1,0 +1,8 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:ics.py - http://git.io/lLljaA
+CALSCALE:GREGORIAN
+X-WR-CALDESC:Event schedule for LSA U14BT3 Hart team
+X-WR-CALNAME:LSA U14BT3 Hart Schedule
+X-WR-TIMEZONE:America/Los_Angeles
+END:VCALENDAR
