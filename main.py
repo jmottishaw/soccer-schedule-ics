@@ -27,9 +27,9 @@ def generate_ics():
         "x-requested-with": "XMLHttpRequest",
     }
 
-    # 🔹 Updated Payload (Formatted for Readability)
+    # 🔹 Updated Payload for U16 Boys Division 2 (Tier 3)
     payload = {
-        "strCompetition": "6|7|10|9",  # Multiple competitions
+        "strCompetition": "12",  # Competition 12 for U16
         "strFiltersXML": """
             <FILTERS>
                 <DATERANGE>
@@ -42,11 +42,11 @@ def generate_ics():
                 </CLUB>
                 <DIVISION>
                     <NAME>DIVISION</NAME>
-                    <VALUE>69</VALUE>
+                    <VALUE>161</VALUE>
                 </DIVISION>
                 <TEAM>
                     <NAME>TEAM</NAME>
-                    <VALUE>410</VALUE>
+                    <VALUE>841</VALUE>
                 </TEAM>
                 <FIELD>
                     <NAME>FIELD</NAME>
@@ -58,8 +58,8 @@ def generate_ics():
                 </GAMES>
             </FILTERS>
         """,
-        "strWeekMax": "2025|6|30:2025|7|6",
-        "strWeekMin": "2024|7|29:2024|8|4"
+        "strWeekMax": "2026|3|16:2026|3|22",
+        "strWeekMin": "2025|8|18:2025|8|24"
     }
 
     # Send request to API
@@ -83,8 +83,8 @@ def generate_ics():
     calendar.add('prodid', 'ics.py - http://git.io/lLljaA')
     calendar.add('version', '2.0')
     calendar.add('calscale', 'GREGORIAN')
-    calendar.add('x-wr-calname', 'LSA U14BT3 Hart Schedule')
-    calendar.add('x-wr-caldesc', 'Event schedule for LSA U14BT3 Hart team')
+    calendar.add('x-wr-calname', 'Lakehill U16 Div 2 (T3) Schedule')
+    calendar.add('x-wr-caldesc', 'Event schedule for Lakehill U16 Division 2 (Tier 3)')
     calendar.add('x-wr-timezone', 'America/Los_Angeles')
 
     tz = pytz.timezone('America/Los_Angeles')
@@ -98,7 +98,7 @@ def generate_ics():
             month_str, day_str = date_text.split(' - ')[0].split(' ', 1)
             day = int(day_str)
             month = month_map[month_str]
-            event_year = 2024 if month >= 8 else 2025
+            event_year = 2025 if month >= 9 else 2026
 
             home_team = game.find("div", class_="Schedule_Home_Text").text.strip() if game.find("div", class_="Schedule_Home_Text") else "--"
             guest_team = game.find("div", "Schedule_Away_Text").text.strip() if game.find("div", "Schedule_Away_Text") else "--"
