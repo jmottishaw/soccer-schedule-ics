@@ -39,7 +39,7 @@ The script is currently configured for:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/soccer-schedule-ics.git
+git clone https://github.com/jmottishaw/soccer-schedule-ics.git
 cd soccer-schedule-ics
 ```
 
@@ -75,10 +75,10 @@ The repository includes a GitHub Actions workflow that:
 - Makes it available via GitHub Pages
 
 To enable this:
-1. Push the repository to GitHub
+1. Fork this repository to your GitHub account
 2. Enable GitHub Actions in your repository settings
 3. Enable GitHub Pages from the `gh-pages` branch
-4. The ICS file will be available at: `https://yourusername.github.io/soccer-schedule-ics/soccer_schedule.ics`
+4. The ICS file will be available at: `https://YOUR-USERNAME.github.io/soccer-schedule-ics/soccer_schedule.ics`
 
 ### Live Calendar Subscription
 
@@ -88,7 +88,7 @@ Once hosted on GitHub Pages, you can subscribe to the live schedule that auto-up
 1. Open Google Calendar
 2. Click the + next to "Other calendars"
 3. Select "From URL"
-4. Enter: `https://yourusername.github.io/soccer-schedule-ics/soccer_schedule.ics`
+4. Enter: `https://YOUR-USERNAME.github.io/soccer-schedule-ics/soccer_schedule.ics`
 5. Click "Add calendar"
 
 **Apple Calendar:**
@@ -167,12 +167,32 @@ soccer-schedule-ics/
 
 ## Finding Team/Division IDs
 
-To find IDs for a different team:
-1. Visit the LSA GameSchedule website
-2. Navigate to your team's schedule
-3. Use browser developer tools (F12) to monitor network requests
-4. Look for `LOAD_SchedulePublic` API calls
-5. Check the request payload for division and team values
+To find the correct Competition, Division, and Team IDs for your team:
+
+### Method 1: Browser Developer Tools
+1. Visit https://lisa.gameschedule.ca
+2. Navigate to your team's schedule page
+3. Open browser developer tools (F12)
+4. Go to the Network tab
+5. Look for requests to `LOAD_SchedulePublic` or `LOAD_FilterValues`
+6. Check the request payload for:
+   - `strCompetition`: The competition ID (e.g., "12" for U16)
+   - `DIVISION VALUE`: The division ID (e.g., 161 for U16 Boys Div 2 Tier 3)
+   - `TEAM VALUE`: Your specific team ID (e.g., 841 for Lakehill SA)
+
+### Method 2: Using the API Explorer (included)
+1. Look at the `find_lakehill_team.py` script as an example
+2. Modify it to search for your team name
+3. Run it to discover the IDs:
+```bash
+source venv/bin/activate
+python find_lakehill_team.py
+```
+
+### Common Competition IDs
+- Different age groups typically have different competition IDs
+- You may need to try multiple competition IDs to find your team
+- The competition ID changes based on the league/age group
 
 ## License
 
