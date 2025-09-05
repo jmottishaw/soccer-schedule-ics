@@ -1,10 +1,20 @@
 # Soccer Schedule ICS Generator
 
-A Python script that automatically fetches soccer schedules from the LSA GameSchedule API and generates an ICS calendar file for easy import into calendar applications.
+A Python script that automatically fetches soccer schedules from the Lower Island Soccer Association (LISA) GameSchedule API and generates an ICS calendar file for easy import into calendar applications.
+
+## Disclaimer
+
+**This is an unofficial, community-created tool** that scrapes data from the LISA GameSchedule website. It is:
+- NOT affiliated with or endorsed by the Lower Island Soccer Association
+- NOT officially supported - it's a personal hack that may break if the API changes
+- Provided as-is with no guarantees - YMMV (Your Mileage May Vary)
+- For personal use only
+
+If the schedule stops updating or shows incorrect data, check the official LISA GameSchedule website.
 
 ## Features
 
-- 🗓️ Fetches game schedules from the LSA (Lower Island Soccer Association) GameSchedule API
+- 🗓️ Fetches game schedules from the LISA GameSchedule API
 - 📅 Generates standard ICS format compatible with all major calendar apps (Google Calendar, Outlook, Apple Calendar, etc.)
 - 🔄 Automated updates via GitHub Actions (runs every 20 minutes)
 - 📍 Includes game locations (field names) and team information
@@ -166,7 +176,11 @@ To find IDs for a different team:
 
 ## License
 
-This project is for personal use. The LSA GameSchedule API is property of the Lower Island Soccer Association.
+This project is for personal/community use only. 
+
+The LISA GameSchedule API and data are property of the Lower Island Soccer Association. This tool merely reformats publicly available schedule data for personal convenience.
+
+Use at your own risk - if this tool causes you to miss a game, that's on you!
 
 ## Contributing
 
