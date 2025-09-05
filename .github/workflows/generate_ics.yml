@@ -31,7 +31,7 @@ jobs:
           git config --global user.email "actions@github.com"  # Set a generic email for commits
           git config --global user.name "GitHub Actions"  # Set a generic name for commits
           git checkout gh-pages || git checkout -b gh-pages  # Switch to gh-pages branch (create it if it doesn't exist)
-          git add soccer_schedule.ics  # Stage the .ics file for commit
+          git add -f soccer_schedule.ics  # Force add the .ics file (bypasses .gitignore)
           git commit -m "Update soccer_schedule.ics" || echo "No changes to commit"  # Avoid failure if no changes
           git push --force origin gh-pages  # Force push changes to the gh-pages branch
 
