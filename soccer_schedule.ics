@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:ics.py - http://git.io/lLljaA
+CALSCALE:GREGORIAN
+X-WR-CALDESC:Event schedule for Lakehill U16 Division 2 (Tier 3)
+X-WR-CALNAME:Lakehill U16 Div 2 (T3) Schedule
+X-WR-TIMEZONE:America/Los_Angeles
+BEGIN:VEVENT
+SUMMARY:Gorge United vs Lakehill SA
+DTSTART;TZID=America/Los_Angeles:20250906T141500
+DTEND;TZID=America/Los_Angeles:20250906T161500
+DESCRIPTION:Home: Gorge United\, Guest: Lakehill SA
+LOCATION:Hampton Park - Kulai Turf
+END:VEVENT
+END:VCALENDAR
