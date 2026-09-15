@@ -24,8 +24,13 @@ Running `main.py` generates `soccer_schedule.ics` next to the script
 ### GitHub Actions Workflow
 `.github/workflows/generate_ics.yml`:
 - Runs every 20 minutes via cron schedule (also manually via workflow_dispatch)
-- Commits the generated ICS file to the gh-pages branch
-- Output is deterministic for unchanged input, so no-op runs don't create commits
+- Checks out the existing gh-pages branch (shallow, via FETCH_HEAD — the main checkout
+  is single-branch so no tracking ref exists), copies the ICS in, and commits/pushes
+  only if `git diff --cached` shows a change; output is deterministic so no-op runs
+  really are no-ops
+- Scheduled workflows get auto-disabled after 60 days of repo inactivity and were
+  disabled manually at the end of last season — re-enable in the Actions tab when
+  starting a season
 
 ## Project Architecture
 
@@ -39,13 +44,18 @@ Running `main.py` generates `soccer_schedule.ics` next to the script
    - Configuration constants at the top of the file (see below)
    - `fetch_league_games()`: API call + BeautifulSoup parse, returns `Schedule_Row` divs
    - `add_league_game()`: parses one row — date/time, teams, field; skips BYE games
-     ("--" opponents); TBD-time games become all-day placeholders only within the
-     next 6 days
+     ("--" opponents); time-TBD (or unparseable-time) games become all-day
+     placeholders from today through 6 days out, then normal events once timed
    - `add_exhibition_game()`: adds one `exhibition.csv` row as a 2-hour event
-   - `add_event()`: shared event builder — stable deterministic UID per game and a
-     DTSTAMP derived from the game date (never run time), so repeat runs produce
-     byte-identical output and calendar clients don't churn on refresh
-   - `generate_ics()`: orchestrates and writes `soccer_schedule.ics`
+   - `add_event()`: shared event builder — deterministic UID (date, or date+time for
+     timed games, plus summary) and a DTSTAMP derived from the start (never run time),
+     so repeat runs are byte-identical, clients don't churn, and a rescheduled game
+     becomes a new event rather than a backwards-dated update
+   - `generate_ics()`: orchestrates, adds a season-limited VTIMEZONE (Outlook needs
+     one for every TZID), writes `soccer_schedule.ics`
+   - Safety: `ScheduleError` (non-zero exit, nothing published) on HTTP failure,
+     non-empty `p_Error`, zero `Schedule_Row`s, or every row failing to parse —
+     an outage must never replace subscribers' calendars with an empty one
 
 3. **Date Handling**:
    - Year determination: month >= 8 (Aug-Dec) → `SEASON_START_YEAR`, else next year

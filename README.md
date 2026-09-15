@@ -27,12 +27,13 @@ The script is currently configured for:
 - **Team**: Lakehill FC U17 (Team ID: 1242)
 - **Division**: U17/18 Boys Div 2 (division filter left at -1; team filter is sufficient)
 - **Competition**: 19
-- **Season**: 2026-2027 Fall/Winter (Sept 2026 - Aug 2027)
+- **Season**: 2026-2027 Fall/Winter (Aug 2026 - Apr 2027)
+- **Games**: unplayed only — once the league records a result the game drops off the calendar
 
 ## Installation
 
 ### Prerequisites
-- Python 3.8 or higher
+- Python 3.10 or higher
 - pip package manager
 
 ### Setup
@@ -71,7 +72,8 @@ This will create `soccer_schedule.ics` in the current directory.
 The repository includes a GitHub Actions workflow that:
 - Runs every 20 minutes
 - Generates an updated ICS file
-- Commits it to the `gh-pages` branch
+- Commits it to the `gh-pages` branch only when the schedule actually changed
+- Publishes nothing if the API errors or returns no games, so subscribers keep the last good calendar
 - Makes it available via GitHub Pages
 
 To enable this:
@@ -79,6 +81,10 @@ To enable this:
 2. Enable GitHub Actions in your repository settings
 3. Enable GitHub Pages from the `gh-pages` branch
 4. The ICS file will be available at: `https://YOUR-USERNAME.github.io/soccer-schedule-ics/soccer_schedule.ics`
+
+GitHub disables scheduled workflows after 60 days without repo activity, and you may
+disable it yourself at season end. To restart for a new season: Actions → Generate ICS →
+Enable workflow, then Run workflow once.
 
 ### Live Calendar Subscription
 
@@ -118,8 +124,10 @@ To update for a different team or season, edit the constants at the top of `main
 You can add exhibition/friendly games not in the regular schedule by updating `exhibition.csv`:
 ```csv
 Date,Time,Home Team,Guest Team,Field
-2024-11-02,2:30 PM,Peninsula U15T3,Lakehill U14 Tier 3,Blue Heron Turf
+2026-10-10,2:30 PM,Peninsula U17,Lakehill FC U17,Blue Heron Turf
 ```
+
+Saving from Excel as "CSV UTF-8" is fine; the BOM is handled.
 
 ## Dependencies
 
@@ -133,6 +141,7 @@ Date,Time,Home Team,Guest Team,Field
 ```
 soccer-schedule-ics/
 ├── main.py                 # Main script
+├── find_*.py               # One-off helpers for discovering competition/division/team IDs
 ├── requirements.txt        # Python dependencies
 ├── exhibition.csv         # Optional exhibition games
 ├── CLAUDE.md             # Development documentation
@@ -153,12 +162,13 @@ soccer-schedule-ics/
 
 ### Times showing as TBD
 - This is normal for games without scheduled times yet
-- The script will only create calendar events for TBD games within the next 6 days
+- TBD games only get an all-day placeholder from today through the next 6 days;
+  they become normal 2-hour events once the league assigns a kickoff time
 
 ### GitHub Actions failing
-- Check that all required secrets are set (if any)
-- Ensure the gh-pages branch exists
-- Verify GitHub Actions and Pages are enabled
+- The script fails on purpose (and publishes nothing) when the API returns an error or
+  zero schedule rows — check the run log; the IDs may be stale or the season may be over
+- Verify GitHub Actions and Pages are enabled, and that the workflow itself isn't disabled
 
 ## Finding Team/Division IDs
 
