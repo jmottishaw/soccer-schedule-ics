@@ -1,4 +1,4 @@
-requests
-beautifulsoup4
-icalendar
-pytz
+requests==2.34.2
+beautifulsoup4==4.15.0
+icalendar==7.3.0
+pytz==2026.3.post1

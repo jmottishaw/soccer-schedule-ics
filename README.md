@@ -19,15 +19,15 @@ If the schedule stops updating or shows incorrect data, check the official LISA 
 - 🔄 Automated updates via GitHub Actions (runs every 20 minutes)
 - 📍 Includes game locations (field names) and team information
 - ⏰ Handles TBD game times appropriately
-- 🎯 Filters for specific team schedules (currently configured for Lakehill U16 Division 2 Tier 3)
+- 🎯 Filters for specific team schedules (currently configured for Lakehill FC U17)
 
 ## Current Configuration
 
 The script is currently configured for:
-- **Team**: Lakehill SA (Team ID: 841)
-- **Division**: U16 Boys Division 2 (Tier 3) (Division ID: 161)
-- **Competition**: 12
-- **Season**: 2025-2026 (Sept 2025 - Aug 2026)
+- **Team**: Lakehill FC U17 (Team ID: 1242)
+- **Division**: U17/18 Boys Div 2 (division filter left at -1; team filter is sufficient)
+- **Competition**: 19
+- **Season**: 2026-2027 Fall/Winter (Sept 2026 - Aug 2027)
 
 ## Installation
 
@@ -43,10 +43,10 @@ git clone https://github.com/jmottishaw/soccer-schedule-ics.git
 cd soccer-schedule-ics
 ```
 
-2. Create a virtual environment (required for WSL):
+2. Create a virtual environment:
 ```bash
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
 
 3. Install dependencies:
@@ -60,7 +60,7 @@ pip install -r requirements.txt
 
 Run the script to generate the ICS file:
 ```bash
-source venv/bin/activate
+source .venv/bin/activate
 python main.py
 ```
 
@@ -104,19 +104,14 @@ Once hosted on GitHub Pages, you can subscribe to the live schedule that auto-up
 
 ## Configuration
 
-To update for a different team or season, modify these values in `main.py`:
+To update for a different team or season, edit the constants at the top of `main.py`:
 
-### API Parameters (lines 32-63)
-- `strCompetition`: Competition ID (currently "12")
-- `DIVISION VALUE`: Division ID (line 45, currently 161)
-- `TEAM VALUE`: Team ID (line 49, currently 841)
-
-### Calendar Metadata (lines 86-87)
-- Calendar name and description
-
-### Season Year Logic (line 101)
-- Update the month threshold for determining the year
-- Current: Sept-Dec = 2025, Jan-Aug = 2026
+- `COMPETITION`: Competition ID (currently "19")
+- `DIVISION_ID`: Division ID (currently -1 = all; team filter does the work)
+- `TEAM_ID`: Team ID (currently 1242, Lakehill FC U17)
+- `WEEK_MIN` / `WEEK_MAX`: season week window (currently Aug 2026 - Apr 2027)
+- `SEASON_START_YEAR`: drives the year logic (Aug-Dec = start year, Jan-Jul = next)
+- `CAL_NAME` / `CAL_DESC`: calendar name and description
 
 ## Exhibition Games
 
@@ -146,7 +141,7 @@ soccer-schedule-ics/
 ├── .github/
 │   └── workflows/
 │       └── generate_ics.yml  # GitHub Actions workflow
-└── venv/                 # Virtual environment (not tracked)
+└── .venv/                # Virtual environment (not tracked)
 ```
 
 ## Troubleshooting
@@ -174,18 +169,22 @@ To find the correct Competition, Division, and Team IDs for your team:
 2. Navigate to your team's schedule page
 3. Open browser developer tools (F12)
 4. Go to the Network tab
-5. Look for requests to `LOAD_SchedulePublic` or `LOAD_FilterValues`
+5. Look for requests to `LOAD_SchedulePublic` or `LOAD_UpdateFilters`
 6. Check the request payload for:
-   - `strCompetition`: The competition ID (e.g., "12" for U16)
-   - `DIVISION VALUE`: The division ID (e.g., 161 for U16 Boys Div 2 Tier 3)
-   - `TEAM VALUE`: Your specific team ID (e.g., 841 for Lakehill SA)
+   - `strCompetition`: The competition ID (e.g., "19" for U17/18 in 2026/27)
+   - `DIVISION` value in `strFiltersXML`: The division ID (-1 works if you filter by team)
+   - `TEAM` value / `ixTeam`: Your specific team ID (e.g., 1242 for Lakehill FC U17)
+   - `strWeekMin` / `strWeekMax`: The season week window (copy verbatim)
+
+An exported HAR of the schedule page also works — the same fields are in the
+captured `GSServicePublic.asmx` request payloads.
 
 ### Method 2: Using the API Explorer (included)
 1. Look at the `find_lakehill_team.py` script as an example
 2. Modify it to search for your team name
 3. Run it to discover the IDs:
 ```bash
-source venv/bin/activate
+source .venv/bin/activate
 python find_lakehill_team.py
 ```
 
