@@ -29,6 +29,10 @@ The script is currently configured for:
 - **Competition**: 19
 - **Season**: 2026-2027 Fall/Winter (Aug 2026 - Apr 2027)
 - **Games**: all season games, played and unplayed, so the calendar doubles as a record of when things happened
+- **Played games**: title shows the final score (e.g. "Gorge United 1 - 4 Lakehill Indulkar");
+  description carries the round and a map link when the site provides one
+- **Postponed / cancelled games**: kept on their original date, title prefixed
+  accordingly, any league note included in the description
 
 ## Installation
 

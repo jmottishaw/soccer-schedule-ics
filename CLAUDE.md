@@ -45,7 +45,12 @@ Running `main.py` generates `soccer_schedule.ics` next to the script
    - `fetch_league_games()`: API call + BeautifulSoup parse, returns `Schedule_Row` divs
    - `add_league_game()`: parses one row — date/time, teams, field; skips BYE games
      ("--" opponents); time-TBD (or unparseable-time) games become all-day
-     placeholders from today through 6 days out, then normal events once timed
+     placeholders from today through 6 days out, then normal events once timed.
+     Played games get the score in the title and the round in the description;
+     postponed/cancelled games are kept (regardless of the TBD window) with the
+     status prefixed and any league note included. The site reuses the field-name
+     div to hold the status word itself when a game has no venue — that text is
+     suppressed as a location rather than shown (e.g. `LOCATION:Postponed`)
    - `add_exhibition_game()`: adds one `exhibition.csv` row as a 2-hour event
    - `add_event()`: shared event builder — deterministic UID (date, or date+time for
      timed games, plus summary) and a DTSTAMP derived from the start (never run time),

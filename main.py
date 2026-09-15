@@ -115,7 +115,7 @@ def fetch_league_games():
     return rows
 
 
-def add_event(calendar, summary, start, end=None, location=None, description=None, all_day=False):
+def add_event(calendar, summary, start, end=None, location=None, description=None, all_day=False, url=None):
     """Add one event with a stable UID so calendar clients don't churn on refresh.
 
     The UID encodes the start (date, or date+time for timed games), so a
@@ -139,6 +139,8 @@ def add_event(calendar, summary, start, end=None, location=None, description=Non
         event.add("location", location)
     if description:
         event.add("description", description)
+    if url:
+        event.add("url", url)
     calendar.add_component(event)
 
 
@@ -168,34 +170,68 @@ def add_league_game(calendar, game):
     field = clean_text(field_div.text) if field_div else ""
     if field == "No Field Assigned":
         field = ""
+    map_match = re.search(r"open\('([^']+)'", field_div.get("onclick", "")) if field_div else None
+    map_url = map_match.group(1) if map_match else None
+
+    # Played games carry "1 - 4" as the score box's own text, with the round in a child div
+    score_div = game.find("div", class_="Schedule_Score_Box")
+    score = clean_text(score_div.find(string=True, recursive=False) or "") if score_div else ""
+    round_div = game.find("div", class_="Schedule_VS_Description")
+    round_label = clean_text(round_div.text) if round_div else ""
+    status_div = game.find("div", class_="Schedule_Status_Text")
+    status = clean_text(status_div.text) if status_div else ""  # e.g. Postponed, Cancelled
+    notes_div = game.find("div", class_="Schedule_Notes_Text")
+    notes = clean_text(notes_div.text).strip("()").strip() if notes_div else ""
+
+    # The site repurposes the field-name div to hold the status word itself when
+    # there's no venue (e.g. field text is literally "Postponed") - don't show that as a location.
+    if status and field.lower() == status.lower():
+        field = ""
+        map_url = None
+
+    if status:
+        summary = f"{status.upper()}: {home_team} vs {guest_team}"
+    elif score:
+        summary = f"{home_team} {score} {guest_team}"
+    else:
+        summary = f"{home_team} vs {guest_team}"
+    description = "\n".join(p for p in (
+        f"Home: {home_team}, Guest: {guest_team}",
+        round_label,
+        notes,
+        map_url,
+    ) if p)
 
     kickoff = parse_time(time_str)
-    print(f"Processing: {home_team} vs {guest_team} on {game_date} at {time_str or 'TBD'}")
+    print(f"Processing: {summary} on {game_date} at {time_str or 'TBD'}")
     if kickoff is None and time_str and time_str != "TBD":
         print(f"  Unrecognised time '{time_str}'; treating as TBD")
 
     if kickoff is None:
-        # Only surface undated games close enough that families need a placeholder.
         today = datetime.now(TZ).date()
-        if today <= game_date <= today + TBD_WINDOW:
+        # A postponed/cancelled game stays on its original date as a record; an
+        # unscheduled one only gets a placeholder close enough that families need it.
+        if status or today <= game_date <= today + TBD_WINDOW:
             add_event(
                 calendar,
-                f"{home_team} vs {guest_team} (TBD)",
+                summary if status else f"{summary} (TBD)",
                 TZ.localize(datetime(event_year, month, day)),
                 location=field or None,
-                description=f"Home: {home_team}, Guest: {guest_team}. Time TBD.",
+                description=description if status else f"{description}\nTime TBD.",
                 all_day=True,
+                url=map_url,
             )
         return
 
     start = TZ.localize(datetime(event_year, month, day, *kickoff))
     add_event(
         calendar,
-        f"{home_team} vs {guest_team}",
+        summary,
         start,
         end=start + GAME_LENGTH,
         location=field or "No Field Assigned",
-        description=f"Home: {home_team}, Guest: {guest_team}",
+        description=description,
+        url=map_url,
     )
 
 
