@@ -88,7 +88,7 @@ def fetch_league_games():
         f"<DIVISION><NAME>DIVISION</NAME><VALUE>{DIVISION_ID}</VALUE></DIVISION>"
         f"<TEAM><NAME>TEAM</NAME><VALUE>{TEAM_ID}</VALUE></TEAM>"
         "<FIELD><NAME>FIELD</NAME><VALUE>-1</VALUE></FIELD>"
-        "<GAMES><NAME>GAMES</NAME><VALUE>UNPLAYED</VALUE></GAMES>"
+        "<GAMES><NAME>GAMES</NAME><VALUE>-1</VALUE></GAMES>"  # all games, so history stays on the calendar
         "</FILTERS>"
     )
     payload = {

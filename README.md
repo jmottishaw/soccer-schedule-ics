@@ -28,7 +28,7 @@ The script is currently configured for:
 - **Division**: U17/18 Boys Div 2 (division filter left at -1; team filter is sufficient)
 - **Competition**: 19
 - **Season**: 2026-2027 Fall/Winter (Aug 2026 - Apr 2027)
-- **Games**: unplayed only — once the league records a result the game drops off the calendar
+- **Games**: all season games, played and unplayed, so the calendar doubles as a record of when things happened
 
 ## Installation
 
@@ -167,7 +167,7 @@ soccer-schedule-ics/
 
 ### GitHub Actions failing
 - The script fails on purpose (and publishes nothing) when the API returns an error or
-  zero schedule rows — check the run log; the IDs may be stale or the season may be over
+  zero schedule rows — check the run log; the IDs are probably stale for the new season
 - Verify GitHub Actions and Pages are enabled, and that the workflow itself isn't disabled
 
 ## Finding Team/Division IDs
