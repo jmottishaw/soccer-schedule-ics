@@ -1,8 +1,18 @@
 BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:ics.py - http://git.io/lLljaA
+PRODID:-//soccer-schedule-ics//github.com/jmottishaw//EN
 CALSCALE:GREGORIAN
-X-WR-CALDESC:Event schedule for Lakehill U16 Division 2 (Tier 3)
-X-WR-CALNAME:Lakehill U16 Div 2 (T3) Schedule
+X-WR-CALDESC:Event schedule for Lakehill FC U17 (U17/18 Boys Div 2)
+X-WR-CALNAME:Lakehill FC U17 Schedule
+X-PUBLISHED-TTL:PT1H
 X-WR-TIMEZONE:America/Los_Angeles
+BEGIN:VEVENT
+SUMMARY:Lakehill FC U17 vs Bays United FC Mitchell (TBD)
+DTSTART;VALUE=DATE:20260920
+DTSTAMP:20260920T070000Z
+UID:20260920-lakehill-fc-u17-vs-bays-united-fc-mitchell-tbd@soccer-schedul
+ e-ics
+DESCRIPTION:Home: Lakehill FC U17\, Guest: Bays United FC Mitchell\nRound 
+ 1\nTime TBD.
+END:VEVENT
 END:VCALENDAR
