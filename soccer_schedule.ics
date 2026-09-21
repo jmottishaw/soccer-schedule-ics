@@ -31,12 +31,12 @@ TZOFFSETTO:-0800
 END:STANDARD
 END:VTIMEZONE
 BEGIN:VEVENT
-SUMMARY:Lakehill FC U17 vs Bays United FC Mitchell
+SUMMARY:Lakehill FC U17 4 - 0 Bays United FC Mitchell
 DTSTART;TZID=America/Los_Angeles:20260920T100000
 DTEND;TZID=America/Los_Angeles:20260920T120000
 DTSTAMP:20260920T170000Z
-UID:20260920t1000-lakehill-fc-u17-vs-bays-united-fc-mitchell@soccer-schedu
- le-ics
+UID:20260920t1000-lakehill-fc-u17-4-0-bays-united-fc-mitchell@soccer-sched
+ ule-ics
 DESCRIPTION:Home: Lakehill FC U17\, Guest: Bays United FC Mitchell\nRound 
  1\nhttps://maps.app.goo.gl/P4fkLHufUfJ5mbru8
 LOCATION:Braefoot Turf
