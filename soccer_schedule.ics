@@ -43,11 +43,12 @@ LOCATION:Braefoot Turf
 URL:https://maps.app.goo.gl/P4fkLHufUfJ5mbru8
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:Lakehill FC U17 vs Bays Unite Pite (TBD)
-DTSTART;VALUE=DATE:20260927
-DTSTAMP:20260927T070000Z
-UID:20260927-lakehill-fc-u17-vs-bays-unite-pite-tbd@soccer-schedule-ics
-DESCRIPTION:Home: Lakehill FC U17\, Guest: Bays Unite Pite\nRound 1\nTime 
- TBD.
+SUMMARY:Lakehill FC U17 vs Bays Unite Pite
+DTSTART;TZID=America/Los_Angeles:20260927T100000
+DTEND;TZID=America/Los_Angeles:20260927T120000
+DTSTAMP:20260927T170000Z
+UID:20260927t1000-lakehill-fc-u17-vs-bays-unite-pite@soccer-schedule-ics
+DESCRIPTION:Home: Lakehill FC U17\, Guest: Bays Unite Pite\nRound 1
+LOCATION:No Field Assigned
 END:VEVENT
 END:VCALENDAR
