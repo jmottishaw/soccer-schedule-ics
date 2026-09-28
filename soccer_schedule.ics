@@ -53,4 +53,12 @@ DESCRIPTION:Home: Lakehill FC U17\, Guest: Bays United Pite\nRound 1\nhttp
 LOCATION:Braefoot Upper
 URL:https://maps.app.goo.gl/P4fkLHufUfJ5mbru8
 END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Saanich Fusion FC vs Lakehill FC U17 (TBD)
+DTSTART;VALUE=DATE:20261004
+DTSTAMP:20261004T070000Z
+UID:20261004-saanich-fusion-fc-vs-lakehill-fc-u17-tbd@soccer-schedule-ics
+DESCRIPTION:Home: Saanich Fusion FC\, Guest: Lakehill FC U17\nRound 1\nTim
+ e TBD.
+END:VEVENT
 END:VCALENDAR
