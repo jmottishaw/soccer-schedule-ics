@@ -48,7 +48,7 @@ Running `main.py` generates `soccer_schedule.ics` next to the script
      (exceeding the cap is a `ScheduleError`, never a silently truncated calendar)
    - `add_league_game()`: parses one row — date/time, teams, field; skips BYE games
      ("--" opponents); time-TBD (or unparseable-time) games become all-day
-     placeholders from today through 6 days out, then normal events once timed.
+     placeholders from today through 13 days out, then normal events once timed.
      Played games get the score in the title and the round in the description;
      postponed/cancelled games are kept (regardless of the TBD window) with the
      status prefixed and any league note included. The site reuses the field-name

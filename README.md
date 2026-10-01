@@ -166,7 +166,7 @@ soccer-schedule-ics/
 
 ### Times showing as TBD
 - This is normal for games without scheduled times yet
-- TBD games only get an all-day placeholder from today through the next 6 days;
+- TBD games only get an all-day placeholder from today through the next 13 days;
   they become normal 2-hour events once the league assigns a kickoff time
 
 ### GitHub Actions failing

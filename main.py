@@ -34,7 +34,7 @@ BASE_DIR = Path(__file__).resolve().parent  # file paths anchored to the repo, n
 TZ_NAME = "America/Los_Angeles"
 TZ = pytz.timezone(TZ_NAME)
 GAME_LENGTH = timedelta(hours=2)
-TBD_WINDOW = timedelta(days=6)
+TBD_WINDOW = timedelta(days=13)  # time-TBD games get an all-day placeholder this far ahead
 TIME_FORMATS = ("%I:%M %p", "%I:%M%p", "%H:%M")
 MONTH_MAP = {m: i for i, m in enumerate(
     ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], start=1)}
