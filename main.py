@@ -29,6 +29,7 @@ CAL_NAME = "Lakehill FC U17 Schedule"
 CAL_DESC = "Event schedule for Lakehill FC U17 (U17/18 Boys Div 2)"
 
 API_URL = "https://lisa.gameschedule.ca/GSServicePublic.asmx/LOAD_SchedulePublic"
+MAX_PAGES = 20  # safety cap on the paginated schedule fetch
 BASE_DIR = Path(__file__).resolve().parent  # file paths anchored to the repo, not the cwd
 TZ_NAME = "America/Los_Angeles"
 TZ = pytz.timezone(TZ_NAME)
@@ -75,7 +76,13 @@ def load_exhibition_games(path="exhibition.csv"):
 
 
 def fetch_league_games():
-    """Query the GameSchedule API and return the schedule rows as soup elements."""
+    """Query the GameSchedule API and return every schedule row as a soup element.
+
+    The API paginates (``intPage`` became mandatory on 2026-09-29 and the call
+    500s without it). One team's season fits on a single page today, but every
+    page is walked so a larger result set never silently truncates, and the
+    page cap turns a runaway into a refusal rather than a partial calendar.
+    """
     headers = {
         "Content-Type": "application/json",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -96,20 +103,40 @@ def fetch_league_games():
         "strFiltersXML": filters,
         "strWeekMax": WEEK_MAX,
         "strWeekMin": WEEK_MIN,
+        "intPage": 1,
     }
 
-    response = requests.post(API_URL, headers=headers, json=payload, timeout=60)
-    if response.status_code != 200:
-        raise ScheduleError(f"Failed to fetch data. Status code: {response.status_code}\nResponse: {response.text}")
+    rows = []
+    for page in range(1, MAX_PAGES + 1):
+        payload["intPage"] = page
+        response = requests.post(API_URL, headers=headers, json=payload, timeout=60)
+        if response.status_code != 200:
+            raise ScheduleError(f"Failed to fetch data. Status code: {response.status_code}\nResponse: {response.text}")
 
-    data = response.json().get("d", {})
-    if data.get("p_Error"):
-        raise ScheduleError(f"API returned an error: {data['p_Error']}")
-    p_content = data.get("p_Content")
-    if not p_content:
-        raise ScheduleError("No content found in API response.")
+        data = response.json().get("d", {})
+        if data.get("p_Error"):
+            raise ScheduleError(f"API returned an error: {data['p_Error']}")
+        p_content = data.get("p_Content")
+        if not p_content:
+            raise ScheduleError(f"No content found in API response (page {page}).")
 
-    rows = BeautifulSoup(p_content, "html.parser").find_all("div", class_="Schedule_Row")
+        # The server clamps an out-of-range page to page 1 instead of erroring, so an
+        # echo mismatch would mean duplicated rows - refuse rather than publish them.
+        try:
+            total_pages = int(data.get("p_TotalPages") or 1)
+            echoed_page = int(data.get("p_Page") or page)
+        except (TypeError, ValueError):
+            raise ScheduleError(f"Unreadable paging fields: p_Page={data.get('p_Page')!r}, "
+                                f"p_TotalPages={data.get('p_TotalPages')!r}.") from None
+        if echoed_page != page:
+            raise ScheduleError(f"Requested page {page} but API returned page {echoed_page}.")
+        if total_pages > MAX_PAGES:
+            raise ScheduleError(f"Schedule spans {total_pages} pages (cap {MAX_PAGES}); refusing to publish a truncated calendar.")
+
+        rows.extend(BeautifulSoup(p_content, "html.parser").find_all("div", class_="Schedule_Row"))
+        if page >= total_pages:
+            break
+
     if not rows:
         raise ScheduleError("API returned no schedule rows (wrong IDs, season over, or page changed).")
     return rows

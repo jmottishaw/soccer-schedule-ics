@@ -42,7 +42,10 @@ Running `main.py` generates `soccer_schedule.ics` next to the script
 
 2. **Structure** (`main.py`):
    - Configuration constants at the top of the file (see below)
-   - `fetch_league_games()`: API call + BeautifulSoup parse, returns `Schedule_Row` divs
+   - `fetch_league_games()`: API call + BeautifulSoup parse, returns `Schedule_Row` divs.
+     The API paginates (`intPage` is mandatory since 2026-09-29; omitting it is an HTTP
+     500) — every page is walked via the response's `p_TotalPages`, capped at `MAX_PAGES`
+     (exceeding the cap is a `ScheduleError`, never a silently truncated calendar)
    - `add_league_game()`: parses one row — date/time, teams, field; skips BYE games
      ("--" opponents); time-TBD (or unparseable-time) games become all-day
      placeholders from today through 6 days out, then normal events once timed.

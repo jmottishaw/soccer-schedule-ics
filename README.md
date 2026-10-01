@@ -172,6 +172,9 @@ soccer-schedule-ics/
 ### GitHub Actions failing
 - The script fails on purpose (and publishes nothing) when the API returns an error or
   zero schedule rows — check the run log; the IDs are probably stale for the new season
+- An HTTP 500 mentioning a "missing value for parameter" means the API changed its
+  signature (that's how `intPage` arrived in Sept 2026) — capture a fresh request from
+  the schedule page and add the new parameter to the payload in `fetch_league_games()`
 - Verify GitHub Actions and Pages are enabled, and that the workflow itself isn't disabled
 
 ## Finding Team/Division IDs
@@ -189,6 +192,8 @@ To find the correct Competition, Division, and Team IDs for your team:
    - `DIVISION` value in `strFiltersXML`: The division ID (-1 works if you filter by team)
    - `TEAM` value / `ixTeam`: Your specific team ID (e.g., 1242 for Lakehill FC U17)
    - `strWeekMin` / `strWeekMax`: The season week window (copy verbatim)
+   - `intPage`: Page number, always sent (mandatory since 2026-09-29); the script
+     walks every page using the `p_TotalPages` field in the response
 
 An exported HAR of the schedule page also works — the same fields are in the
 captured `GSServicePublic.asmx` request payloads.
