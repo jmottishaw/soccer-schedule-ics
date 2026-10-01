@@ -54,11 +54,14 @@ LOCATION:Braefoot Upper
 URL:https://maps.app.goo.gl/P4fkLHufUfJ5mbru8
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:Saanich Fusion FC vs Lakehill FC U17 (TBD)
-DTSTART;VALUE=DATE:20261004
-DTSTAMP:20261004T070000Z
-UID:20261004-saanich-fusion-fc-vs-lakehill-fc-u17-tbd@soccer-schedule-ics
-DESCRIPTION:Home: Saanich Fusion FC\, Guest: Lakehill FC U17\nRound 1\nTim
- e TBD.
+SUMMARY:Saanich Fusion FC vs Lakehill FC U17
+DTSTART;TZID=America/Los_Angeles:20261004T100000
+DTEND;TZID=America/Los_Angeles:20261004T120000
+DTSTAMP:20261004T170000Z
+UID:20261004t1000-saanich-fusion-fc-vs-lakehill-fc-u17@soccer-schedule-ics
+DESCRIPTION:Home: Saanich Fusion FC\, Guest: Lakehill FC U17\nRound 1\nhtt
+ ps://maps.app.goo.gl/JByoGV9vJjCEzQ4Z7
+LOCATION:Lochside Turf
+URL:https://maps.app.goo.gl/JByoGV9vJjCEzQ4Z7
 END:VEVENT
 END:VCALENDAR
