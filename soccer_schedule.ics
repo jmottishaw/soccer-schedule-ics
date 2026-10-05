@@ -64,4 +64,12 @@ DESCRIPTION:Home: Saanich Fusion FC\, Guest: Lakehill FC U17\nRound 1\nhtt
 LOCATION:Lochside Turf
 URL:https://maps.app.goo.gl/JByoGV9vJjCEzQ4Z7
 END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Gorge FC U18 vs Lakehill FC U17 (TBD)
+DTSTART;VALUE=DATE:20261018
+DTSTAMP:20261018T070000Z
+UID:20261018-gorge-fc-u18-vs-lakehill-fc-u17-tbd@soccer-schedule-ics
+DESCRIPTION:Home: Gorge FC U18\, Guest: Lakehill FC U17\nRound 1\nTime TBD
+ .
+END:VEVENT
 END:VCALENDAR
