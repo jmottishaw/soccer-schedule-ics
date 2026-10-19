@@ -83,4 +83,11 @@ DTSTAMP:20261025T070000Z
 UID:20261025-jdf-u17-vs-lakehill-fc-u17-tbd@soccer-schedule-ics
 DESCRIPTION:Home: JDF U17\, Guest: Lakehill FC U17\nRound 1\nTime TBD.
 END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Lakehill FC U17 vs JDF U18 (TBD)
+DTSTART;VALUE=DATE:20261101
+DTSTAMP:20261101T070000Z
+UID:20261101-lakehill-fc-u17-vs-jdf-u18-tbd@soccer-schedule-ics
+DESCRIPTION:Home: Lakehill FC U17\, Guest: JDF U18\nRound 1\nTime TBD.
+END:VEVENT
 END:VCALENDAR
