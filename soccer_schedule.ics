@@ -77,11 +77,15 @@ LOCATION:PISE
 URL:https://maps.app.goo.gl/EmJ84nvqCP5etTiV6
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:JDF U17 vs Lakehill FC U17 (TBD)
-DTSTART;VALUE=DATE:20261025
-DTSTAMP:20261025T070000Z
-UID:20261025-jdf-u17-vs-lakehill-fc-u17-tbd@soccer-schedule-ics
-DESCRIPTION:Home: JDF U17\, Guest: Lakehill FC U17\nRound 1\nTime TBD.
+SUMMARY:JDF U17 vs Lakehill FC U17
+DTSTART;TZID=America/Los_Angeles:20261025T100000
+DTEND;TZID=America/Los_Angeles:20261025T120000
+DTSTAMP:20261025T170000Z
+UID:20261025t1000-jdf-u17-vs-lakehill-fc-u17@soccer-schedule-ics
+DESCRIPTION:Home: JDF U17\, Guest: Lakehill FC U17\nRound 1\nhttps://maps.
+ app.goo.gl/esF4TntH1ZcuDcq59
+LOCATION:Royal Bay Turf
+URL:https://maps.app.goo.gl/esF4TntH1ZcuDcq59
 END:VEVENT
 BEGIN:VEVENT
 SUMMARY:Lakehill FC U17 vs JDF U18 (TBD)
