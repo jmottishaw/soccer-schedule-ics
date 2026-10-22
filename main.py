@@ -10,6 +10,7 @@ transient outage never replaces subscribers' calendars with an empty one.
 import csv
 import re
 import sys
+import time
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
@@ -30,6 +31,9 @@ CAL_DESC = "Event schedule for Lakehill FC U17 (U17/18 Boys Div 2)"
 
 API_URL = "https://lisa.gameschedule.ca/GSServicePublic.asmx/LOAD_SchedulePublic"
 MAX_PAGES = 20  # safety cap on the paginated schedule fetch
+REQUEST_TIMEOUT = (10, 60)  # (connect, read) seconds
+RETRY_DELAYS = (30, 90)  # waits before each retry; GitHub runs the cron only every few hours
+RETRY_STATUSES = {502, 503, 504}  # gateway hiccups; a 500 means the API contract changed, so no retry
 BASE_DIR = Path(__file__).resolve().parent  # file paths anchored to the repo, not the cwd
 TZ_NAME = "America/Los_Angeles"
 TZ = pytz.timezone(TZ_NAME)
@@ -75,6 +79,27 @@ def load_exhibition_games(path="exhibition.csv"):
     return rows
 
 
+def post_with_retry(url, headers, payload):
+    """POST, retrying network errors and gateway statuses before giving up.
+
+    The schedule query is a read, so repeating it is safe. Exhausted retries
+    raise ScheduleError so a lasting outage still fails the run cleanly.
+    """
+    for attempt, delay in enumerate((*RETRY_DELAYS, None), start=1):
+        try:
+            response = requests.post(url, headers=headers, json=payload, timeout=REQUEST_TIMEOUT)
+        except requests.RequestException as e:
+            problem = f"{type(e).__name__}: {e}"
+        else:
+            if response.status_code not in RETRY_STATUSES:
+                return response
+            problem = f"HTTP {response.status_code}"
+        if delay is None:
+            raise ScheduleError(f"Gave up after {attempt} attempts. Last error: {problem}")
+        print(f"Attempt {attempt} failed ({problem}); retrying in {delay}s")
+        time.sleep(delay)
+
+
 def fetch_league_games():
     """Query the GameSchedule API and return every schedule row as a soup element.
 
@@ -109,7 +134,7 @@ def fetch_league_games():
     rows = []
     for page in range(1, MAX_PAGES + 1):
         payload["intPage"] = page
-        response = requests.post(API_URL, headers=headers, json=payload, timeout=60)
+        response = post_with_retry(API_URL, headers, payload)
         if response.status_code != 200:
             raise ScheduleError(f"Failed to fetch data. Status code: {response.status_code}\nResponse: {response.text}")
 

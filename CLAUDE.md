@@ -61,7 +61,11 @@ Running `main.py` generates `soccer_schedule.ics` next to the script
      becomes a new event rather than a backwards-dated update
    - `generate_ics()`: orchestrates, adds a season-limited VTIMEZONE (Outlook needs
      one for every TZID), writes `soccer_schedule.ics`
-   - Safety: `ScheduleError` (non-zero exit, nothing published) on HTTP failure,
+   - `post_with_retry()`: each API call gets 3 attempts (waits 30s, then 90s) on
+     network errors and 502/503/504, since a blip otherwise waits hours for the next
+     cron run; a 500 isn't retried (that's how the `intPage` contract change showed up)
+   - Safety: `ScheduleError` (non-zero exit, nothing published) on HTTP failure
+     (including exhausted retries),
      non-empty `p_Error`, zero `Schedule_Row`s, or every row failing to parse —
      an outage must never replace subscribers' calendars with an empty one
 
