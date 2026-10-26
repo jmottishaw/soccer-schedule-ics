@@ -95,4 +95,11 @@ DTSTAMP:20261101T070000Z
 UID:20261101-lakehill-indulkar-vs-jdf-u18-tbd@soccer-schedule-ics
 DESCRIPTION:Home: Lakehill Indulkar\, Guest: JDF U18\nRound 1\nTime TBD.
 END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Lakehill Indulkar vs NUFC U18 (TBD)
+DTSTART;VALUE=DATE:20261108
+DTSTAMP:20261108T080000Z
+UID:20261108-lakehill-indulkar-vs-nufc-u18-tbd@soccer-schedule-ics
+DESCRIPTION:Home: Lakehill Indulkar\, Guest: NUFC U18\nRound 1\nTime TBD.
+END:VEVENT
 END:VCALENDAR
