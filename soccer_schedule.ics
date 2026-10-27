@@ -89,11 +89,15 @@ LOCATION:Royal Bay Turf
 URL:https://maps.app.goo.gl/esF4TntH1ZcuDcq59
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:Lakehill Indulkar vs JDF U18 (TBD)
-DTSTART;VALUE=DATE:20261101
-DTSTAMP:20261101T070000Z
-UID:20261101-lakehill-indulkar-vs-jdf-u18-tbd@soccer-schedule-ics
-DESCRIPTION:Home: Lakehill Indulkar\, Guest: JDF U18\nRound 1\nTime TBD.
+SUMMARY:Lakehill Indulkar vs JDF U18
+DTSTART;TZID=America/Los_Angeles:20261101T100000
+DTEND;TZID=America/Los_Angeles:20261101T120000
+DTSTAMP:20261101T180000Z
+UID:20261101t1000-lakehill-indulkar-vs-jdf-u18@soccer-schedule-ics
+DESCRIPTION:Home: Lakehill Indulkar\, Guest: JDF U18\nRound 1\nhttps://map
+ s.app.goo.gl/P4fkLHufUfJ5mbru8
+LOCATION:Braefoot Turf
+URL:https://maps.app.goo.gl/P4fkLHufUfJ5mbru8
 END:VEVENT
 BEGIN:VEVENT
 SUMMARY:Lakehill Indulkar vs NUFC U18 (TBD)
