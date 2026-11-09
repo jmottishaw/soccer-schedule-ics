@@ -100,23 +100,26 @@ LOCATION:Braefoot Turf
 URL:https://maps.app.goo.gl/P4fkLHufUfJ5mbru8
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:Lakehill Indulkar vs NUFC U18
+SUMMARY:Lakehill Indulkar 3 - 3 NUFC U18
 DTSTART;TZID=America/Los_Angeles:20261108T120000
 DTEND;TZID=America/Los_Angeles:20261108T140000
 DTSTAMP:20261108T200000Z
-UID:20261108t1200-lakehill-indulkar-vs-nufc-u18@soccer-schedule-ics
+UID:20261108t1200-lakehill-indulkar-3-3-nufc-u18@soccer-schedule-ics
 DESCRIPTION:Home: Lakehill Indulkar\, Guest: NUFC U18\nRound 1\nhttps://ma
  ps.app.goo.gl/P4fkLHufUfJ5mbru8
 LOCATION:Braefoot Turf
 URL:https://maps.app.goo.gl/P4fkLHufUfJ5mbru8
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:Lakehill Indulkar vs Gorge FC U18 (TBD)
-DTSTART;VALUE=DATE:20261115
-DTSTAMP:20261115T080000Z
-UID:20261115-lakehill-indulkar-vs-gorge-fc-u18-tbd@soccer-schedule-ics
-DESCRIPTION:Home: Lakehill Indulkar\, Guest: Gorge FC U18\nRound 2\nTime T
- BD.
+SUMMARY:Lakehill Indulkar vs Gorge FC U18
+DTSTART;TZID=America/Los_Angeles:20261115T100000
+DTEND;TZID=America/Los_Angeles:20261115T120000
+DTSTAMP:20261115T180000Z
+UID:20261115t1000-lakehill-indulkar-vs-gorge-fc-u18@soccer-schedule-ics
+DESCRIPTION:Home: Lakehill Indulkar\, Guest: Gorge FC U18\nRound 2\nhttps:
+ //maps.app.goo.gl/P4fkLHufUfJ5mbru8
+LOCATION:Braefoot Lower
+URL:https://maps.app.goo.gl/P4fkLHufUfJ5mbru8
 END:VEVENT
 BEGIN:VEVENT
 SUMMARY:NUFC U18 vs Lakehill Indulkar (TBD)
