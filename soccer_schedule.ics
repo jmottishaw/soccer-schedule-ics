@@ -118,4 +118,11 @@ UID:20261115-lakehill-indulkar-vs-gorge-fc-u18-tbd@soccer-schedule-ics
 DESCRIPTION:Home: Lakehill Indulkar\, Guest: Gorge FC U18\nRound 2\nTime T
  BD.
 END:VEVENT
+BEGIN:VEVENT
+SUMMARY:NUFC U18 vs Lakehill Indulkar (TBD)
+DTSTART;VALUE=DATE:20261122
+DTSTAMP:20261122T080000Z
+UID:20261122-nufc-u18-vs-lakehill-indulkar-tbd@soccer-schedule-ics
+DESCRIPTION:Home: NUFC U18\, Guest: Lakehill Indulkar\nRound 2\nTime TBD.
+END:VEVENT
 END:VCALENDAR
