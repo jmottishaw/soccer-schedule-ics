@@ -122,10 +122,14 @@ LOCATION:Braefoot Lower
 URL:https://maps.app.goo.gl/P4fkLHufUfJ5mbru8
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:NUFC U18 vs Lakehill Indulkar (TBD)
-DTSTART;VALUE=DATE:20261122
-DTSTAMP:20261122T080000Z
-UID:20261122-nufc-u18-vs-lakehill-indulkar-tbd@soccer-schedule-ics
-DESCRIPTION:Home: NUFC U18\, Guest: Lakehill Indulkar\nRound 2\nTime TBD.
+SUMMARY:NUFC U18 vs Lakehill Indulkar
+DTSTART;TZID=America/Los_Angeles:20261122T140000
+DTEND;TZID=America/Los_Angeles:20261122T160000
+DTSTAMP:20261122T220000Z
+UID:20261122t1400-nufc-u18-vs-lakehill-indulkar@soccer-schedule-ics
+DESCRIPTION:Home: NUFC U18\, Guest: Lakehill Indulkar\nRound 2\nhttps://ma
+ ps.app.goo.gl/xGuBKDRiNoRXLyvM9
+LOCATION:Merle Logan
+URL:https://maps.app.goo.gl/xGuBKDRiNoRXLyvM9
 END:VEVENT
 END:VCALENDAR
