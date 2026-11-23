@@ -122,14 +122,22 @@ LOCATION:Braefoot Lower
 URL:https://maps.app.goo.gl/P4fkLHufUfJ5mbru8
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:NUFC U18 vs Lakehill Indulkar
+SUMMARY:NUFC U18 1 - 0 Lakehill Indulkar
 DTSTART;TZID=America/Los_Angeles:20261122T140000
 DTEND;TZID=America/Los_Angeles:20261122T160000
 DTSTAMP:20261122T220000Z
-UID:20261122t1400-nufc-u18-vs-lakehill-indulkar@soccer-schedule-ics
+UID:20261122t1400-nufc-u18-1-0-lakehill-indulkar@soccer-schedule-ics
 DESCRIPTION:Home: NUFC U18\, Guest: Lakehill Indulkar\nRound 2\nhttps://ma
  ps.app.goo.gl/xGuBKDRiNoRXLyvM9
 LOCATION:Merle Logan
 URL:https://maps.app.goo.gl/xGuBKDRiNoRXLyvM9
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Bays United Pite vs Lakehill Indulkar (TBD)
+DTSTART;VALUE=DATE:20261206
+DTSTAMP:20261206T080000Z
+UID:20261206-bays-united-pite-vs-lakehill-indulkar-tbd@soccer-schedule-ics
+DESCRIPTION:Home: Bays United Pite\, Guest: Lakehill Indulkar\nRound 2\nTi
+ me TBD.
 END:VEVENT
 END:VCALENDAR
